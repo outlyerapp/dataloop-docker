@@ -18,4 +18,5 @@ Sends CAdvisor metrics to Dataloop via the Graphite endpoint every 30 seconds by
 
 - check.py
 
-Polls :8080/health_check for a 200 response code over docker internal network address and emits 0,1,2,3 to <fingerprint>.health_check
+Polls :8080/health_check for a 200 response code over docker internal network address and emits 0,1,2,3 to <fingerprint>.health_check 
+
