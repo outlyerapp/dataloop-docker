@@ -67,7 +67,10 @@ def get_agents_details(finger):
 
 
 def register_agent(finger, data):
-    return requests.post(EXCHANGE + '/agents/' + finger + '/register', json=data, headers=api_header())
+    try:
+        return requests.post(EXCHANGE + '/agents/' + finger + '/register', json=data, headers=api_header())
+    except Exception as E:
+        print "Failed to register agent: %s" % E
 
 
 def create_agent(container):
