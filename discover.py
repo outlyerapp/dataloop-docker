@@ -8,7 +8,7 @@ from socket import gethostname
 API_KEY = ''  # You need to set this!
 EXCHANGE = 'https://agent.dataloop.io'
 API = 'https://www.dataloop.io'
-CADVISOR = 'http://192.168.59.103:8080'  # Boot2docker CAdvisor container. Change this if on Linux.
+CADVISOR = 'http://192.168.99.100:8080'  # CAdvisor container URL. Change this if on Linux.
 
 # Don't touch anything below this point. In fact don't even scroll down.
 
