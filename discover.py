@@ -152,11 +152,3 @@ while True:
                 deregister_agent(finger)
 
     sleep(5)  # have a little rest
-
-
-
-
-
-
-
-
