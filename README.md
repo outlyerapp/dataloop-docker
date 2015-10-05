@@ -33,7 +33,7 @@ Tags agents in Dataloop with their Docker Tags by matching container ID to agent
 
 - metrics.py
 
-Sends CAdvisor metrics to Dataloop via the Graphite endpoint every 30 seconds by matching container ID to agent name.
+Sends CAdvisor metrics to Dataloop via the Graphite endpoint every 10 seconds by matching container ID to agent name.
 
 - check.py
 
