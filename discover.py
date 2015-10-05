@@ -133,7 +133,7 @@ def ping(finger, container):
     try:
         return requests.post(API + '/agents/' + finger + '/ping', json=data, headers=api_header())
     except Exception as E:
-        print "Failed to ping agent: %s" % E
+        print "Failed to register ping for agent: %s" % E
 
 
 def get_containers():
@@ -171,10 +171,10 @@ def main(argv):
     print "Container Auto-Discovery running. Press ctrl+c to exit!"
     while True:
 
-        agents = get_agents()
+        agents = get_agents() or []
         # print "dataloop agents: %s" % len(agents)
 
-        containers = get_containers()
+        containers = get_containers() or []
         # print "cadvisor containers: %s" % len(containers)
 
         # add agents that don't exist in Dataloop
