@@ -122,7 +122,6 @@ def get_containers():
         return False
 
     for k, v in _resp.iteritems():
-        ## TODO: v['stats'] contains all the metrics for this container
         _containers.append(v['name'].replace('/docker/', '')[:12])
     return _containers
 
