@@ -98,7 +98,6 @@ def create_agent(container):
 
     resp = register_agent(_finger, data)
     if resp.status_code == 200:
-        pass
         print "successfully registered %s" % _finger
     else:
         print "registration of %s failed with status code %d" % (_finger, resp.status_code)
@@ -117,21 +116,22 @@ def deregister_agent(finger):
 def ping(finger, container):
     # this uses an old api and needs switching over to websocket
     data = {
-            'mac': get_mac(),
-            'hostname': gethostname(),
-            'tags': '',
-            'os_name': 'docker',
-            'os_version': '',
-            'container_name': '',
-            'proc_list': '',
-            'ip': '',
-            'interfaces': '',
-            'mode': 'solo',
-            'name': container
+        'mac': get_mac(),
+        'hostname': gethostname(),
+        'tags': '',
+        'os_name': 'docker',
+        'os_version': '',
+        'container_name': '',
+        'proc_list': '',
+        'ip': '',
+        'interfaces': '',
+        'mode': 'solo',
+        'name': container
     }
-
     try:
-        return requests.post(API + '/agents/' + finger + '/ping', json=data, headers=api_header())
+        resp = requests.post(API + '/agents/' + finger + '/ping', json=data, headers=api_header())
+        if resp.status_code != 200:
+            print "Failed to update ping for agent %s. Got response code %s!" % (finger, resp.status_code)
     except Exception as E:
         print "Failed to register ping for agent: %s" % E
 
@@ -187,8 +187,9 @@ def main(argv):
                 # ping other running containers
                 if container in agents:
                     finger = agent_name_to_finger(container)
-                    #  print "pinging container: %s : %s " % (finger, container)
+                    #print "pinging container: %s : %s " % (finger, container)
                     ping(finger, container)
+
 
 
             # delete agents that don't exist as containers

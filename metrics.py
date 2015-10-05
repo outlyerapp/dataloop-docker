@@ -4,7 +4,6 @@ import uuid
 from time import sleep
 import socket
 import sys, getopt
-import multiprocessing
 
 API_KEY = ''  # You need to set this!
 EXCHANGE = 'https://agent.dataloop.io'
@@ -14,8 +13,6 @@ CADVISOR = 'http://127.0.0.1:8080'
 GRAPHITE_SERVER = 'graphite.dataloop.io'
 GRAPHITE_PORT = 2003
 
-CORES = multiprocessing.cpu_count()
-
 
 def api_header():
     return {"Content-type": "application/json", "Authorization": "Bearer " + API_KEY}
@@ -23,6 +20,14 @@ def api_header():
 
 def get_mac():
     return str(uuid.getnode())
+
+
+def get_machine_data():
+    try:
+        return requests.get(CADVISOR + '/api/v1.3/machine').json()
+    except Exception as E:
+        print "Failed to query num_cores: %s" % E
+        return False
 
 
 def flatten(structure, key="", path="", flattened=None):
@@ -81,7 +86,13 @@ def send_msg(message):
 
 
 def main(argv):
+
     global API_KEY, CADVISOR
+
+    # get count of host cpu cores
+    machine_data = get_machine_data()
+    cores = machine_data['num_cores']
+    memory = machine_data['memory_capacity']
 
     try:
        opts, args = getopt.getopt(argv,"ha:c::",["apikey=","cadvisor="])
@@ -96,8 +107,8 @@ def main(argv):
           API_KEY = arg
        elif opt in ("-c", "--cadvisor"):
           CADVISOR = arg
-    print 'apikey is "', API_KEY , '"'
-    print 'cadvisor endpoint is "', CADVISOR, '"'
+    #print 'apikey is "', API_KEY , '"'
+    #print 'cadvisor endpoint is "', CADVISOR, '"'
 
     print "Container Metric Send running. Press ctrl+c to exit!"
     while True:
@@ -107,14 +118,32 @@ def main(argv):
         flat_metrics = {}
         if len(agents)>0 and len(metrics)>0:
             for container, v in metrics.iteritems():
+
                 finger = agents[container]
                 flat_metrics[container] = {}
+
+                # 60 samples in a list at 1 second interval. 59 being most recent.
+                cpu_total_now = v[59]['cpu']['usage']['total']
+                cpu_total_prev = v[49]['cpu']['usage']['total']
+
+                # calculate the cpu difference over 10 seconds then calculate rate
+                cpu_total_delta = cpu_total_now - cpu_total_prev
+                cpu_total_rate = cpu_total_delta / 10
+
+                # total amount of cpu is number of billionths of a core
+                total_compute_available = cores * 1000000000
+
+                # now you can work out percentage cpu used per second
+                cpu_percent = cpu_total_rate / total_compute_available * 100
+
+                # get most recent memory percentage
+                memory_percent = v[59]['memory']['usage'] / memory * 100
 
                 # populate base metrics
                 base = {
                     finger + '.base.load_1_min': v[0]['cpu']['load_average'],
-                    finger + '.base.cpu': v[0]['cpu']['usage']['total'] * 1000000000 / CORES,
-                    finger + '.base.memory': v[0]['memory']['usage']
+                    finger + '.base.cpu': cpu_percent,
+                    finger + '.base.memory': memory_percent
 
                 }
                 flat_metrics[container].update(base)
@@ -124,8 +153,6 @@ def main(argv):
                     for m in ['network', 'diskio', 'memory', 'cpu']:
                         z = flatten(a[m], key=m, path=finger)
                         flat_metrics[container].update(z)
-            print flat_metrics
-
 
             for c, d in flat_metrics.iteritems():
                 for path, value in d.iteritems():
