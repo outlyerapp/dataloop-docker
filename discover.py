@@ -4,11 +4,12 @@ import uuid
 import json
 from time import sleep
 from socket import gethostname
+import sys,getopt
 
 API_KEY = ''  # You need to set this!
 EXCHANGE = 'https://agent.dataloop.io'
 API = 'https://www.dataloop.io'
-CADVISOR = 'http://127.0.0.1:8080'  # CAdvisor container URL. Change this if on Linux.
+CADVISOR = 'http://127.0.0.1:8080'
 
 # Don't touch anything below this point. In fact don't even scroll down.
 
@@ -148,37 +149,59 @@ def get_containers():
     return _containers
 
 
-print "Container Auto-Discovery running. Press ctrl+c to exit!"
-while True:
+def main(argv):
+    global API_KEY, CADVISOR
 
-    agents = get_agents()
-    # print "dataloop agents: %s" % len(agents)
+    try:
+       opts, args = getopt.getopt(argv,"ha:c::",["apikey=","cadvisor="])
+    except getopt.GetoptError:
+       print 'metrics.py -a <apikey> -c <cadvisor address:port>'
+       sys.exit(2)
+    for opt, arg in opts:
+       if opt == '-h':
+          print 'metrics.py -a <apikey> -c <cadvisor address:port>'
+          sys.exit()
+       elif opt in ("-a", "--apikey"):
+          API_KEY = arg
+       elif opt in ("-c", "--cadvisor"):
+          CADVISOR = arg
+    print 'apikey is "', API_KEY , '"'
+    print 'cadvisor endpoint is "', CADVISOR, '"'
 
-    containers = get_containers()
-    # print "cadvisor containers: %s" % len(containers)
+    print "Container Auto-Discovery running. Press ctrl+c to exit!"
+    while True:
 
-    # add agents that don't exist in Dataloop
-    if len(containers)>=0 and len(agents)>=0:
-        for container in containers:
-            if container not in agents:
-                print "adding container: %s" % container
-                create_agent(container)
+        agents = get_agents()
+        # print "dataloop agents: %s" % len(agents)
 
-            # ping other running containers
-            if container in agents:
-                finger = agent_name_to_finger(container)
-                print "pinging container: %s : %s " % (finger, container)
-                ping(finger, container)
+        containers = get_containers()
+        # print "cadvisor containers: %s" % len(containers)
 
+        # add agents that don't exist in Dataloop
+        if len(containers)>=0 and len(agents)>=0:
+            for container in containers:
+                if container not in agents:
+                    print "adding container: %s" % container
+                    create_agent(container)
 
-        # delete agents that don't exist as containers
-        for agent in agents:
-            if agent not in containers:
-                #print "deleting agent: %s" % agent
-                finger = agent_name_to_finger(agent)
-                deregister_agent(finger)
+                # ping other running containers
+                if container in agents:
+                    finger = agent_name_to_finger(container)
+                    print "pinging container: %s : %s " % (finger, container)
+                    ping(finger, container)
 
 
+            # delete agents that don't exist as containers
+            for agent in agents:
+                if agent not in containers:
+                    #print "deleting agent: %s" % agent
+                    finger = agent_name_to_finger(agent)
+                    deregister_agent(finger)
 
 
-    sleep(5)  # have a little rest
+        sleep(5)  # have a little rest
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
+

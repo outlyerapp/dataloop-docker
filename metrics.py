@@ -3,10 +3,13 @@ import requests
 import uuid
 from time import sleep
 import socket
+import sys,getopt
 
-API_KEY = ''
+API_KEY = ''  # You need to set this!
+EXCHANGE = 'https://agent.dataloop.io'
 API = 'https://www.dataloop.io'
-CADVISOR = 'http://192.168.99.100:8080'  # CAdvisor container URL. Change this if on Linux.
+CADVISOR = 'http://127.0.0.1:8080'
+
 GRAPHITE_SERVER = 'graphite.dataloop.io'
 GRAPHITE_PORT = 2003
 
@@ -53,7 +56,7 @@ def get_metrics():
     except Exception as E:
         print "Failed to query containers: %s" % E
         return False
-    
+
     for k, v in _resp.iteritems():
         _containers.append(v['name'].replace('/docker/', '')[:12])
         name = v['name'].replace('/docker/', '')[:12]
@@ -64,6 +67,7 @@ def get_metrics():
 # send metrics to graphite
 def send_msg(message):
     # print "Sending message:\n%s" % message
+    # return
     try:
         sock = socket.socket()
         sock.connect((GRAPHITE_SERVER, GRAPHITE_PORT))
@@ -73,24 +77,50 @@ def send_msg(message):
         print('CRITICAL - something is wrong with %s:%s. Exception is %s' % (GRAPHITE_SERVER, GRAPHITE_PORT, e))
 
 
-print "Container Metric Send running. Press ctrl+c to exit!"
-while True:
-    agents = get_agents()
-    metrics = get_metrics()
 
-    flat_metrics = {}
-    for container, v in metrics.iteritems():
-        finger = agents[container]
-        flat_metrics[container] = {}
-        for a in v:
-            for m in ['network', 'diskio', 'memory', 'cpu']:
-                z = flatten(a[m], key=m, path=finger)
-                flat_metrics[container].update(z)
+def main(argv):
+    global API_KEY, CADVISOR
 
-    for c, d in flat_metrics.iteritems():
-        for path, value in d.iteritems():
-            if isinstance(value, int):
-                message = "%s %s\n" % (path, value)
-                send_msg(message)
+    try:
+       opts, args = getopt.getopt(argv,"ha:c::",["apikey=","cadvisor="])
+    except getopt.GetoptError:
+       print 'metrics.py -a <apikey> -c <cadvisor address:port>'
+       sys.exit(2)
+    for opt, arg in opts:
+       if opt == '-h':
+          print 'metrics.py -a <apikey> -c <cadvisor address:port>'
+          sys.exit()
+       elif opt in ("-a", "--apikey"):
+          API_KEY = arg
+       elif opt in ("-c", "--cadvisor"):
+          CADVISOR = arg
+    print 'apikey is "', API_KEY , '"'
+    print 'cadvisor endpoint is "', CADVISOR, '"'
 
-    sleep(5)    #  sleepy time
+    print "Container Metric Send running. Press ctrl+c to exit!"
+    while True:
+        agents = get_agents() or []
+        metrics = get_metrics() or []
+
+        flat_metrics = {}
+        if len(agents)>0 and len(metrics)>0:
+            for container, v in metrics.iteritems():
+                finger = agents[container]
+                flat_metrics[container] = {}
+                for a in v:
+                    for m in ['network', 'diskio', 'memory', 'cpu']:
+                        z = flatten(a[m], key=m, path=finger)
+                        flat_metrics[container].update(z)
+
+            for c, d in flat_metrics.iteritems():
+                for path, value in d.iteritems():
+                    if isinstance(value, int):
+                        message = "%s %s\n" % (path, value)
+                        send_msg(message)
+
+        sleep(10)    #  sleepy time
+
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
