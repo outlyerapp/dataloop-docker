@@ -14,16 +14,6 @@ dataloop-docker:latest
 ```
 
 
-### Interactive running to debug:
-```
-docker run --rm -t -i -e API_KEY=<<KEY>> \
---volume=/:/rootfs:ro \
---volume=/var/run:/var/run:rw \
---volume=/sys:/sys:ro \
---volume=/var/lib/docker/:/var/lib/docker:ro \
-dataloop-docker:latest /sbin/my_init -- bash -l
-```
-
 Contributing Changes
 ====================
 
@@ -48,3 +38,13 @@ Sends CAdvisor metrics to Dataloop via the Graphite endpoint every 30 seconds by
 - check.py
 
 Polls :8080/health_check for a 200 response code over docker internal network address and emits 0,1,2,3 to <fingerprint>.health_check 
+
+### Interactive running to debug:
+```
+docker run --rm -t -i -e API_KEY=<<KEY>> \
+--volume=/:/rootfs:ro \
+--volume=/var/run:/var/run:rw \
+--volume=/sys:/sys:ro \
+--volume=/var/lib/docker/:/var/lib/docker:ro \
+dataloop-docker:latest /sbin/my_init -- bash -l
+```
