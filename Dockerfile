@@ -7,8 +7,6 @@ FROM phusion/baseimage:latest
 # Use baseimage-docker's init system.
 CMD ["/sbin/my_init"]
 
-# ...put your own build instructions here...
-
 # Install Dataloop Agent
 # For the python environment
 RUN curl -s https://download.dataloop.io/pubkey.gpg | apt-key add - \
