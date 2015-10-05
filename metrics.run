@@ -1,0 +1,6 @@
+#!/bin/sh
+# `/sbin/setuser memcache` runs the given command as the user `memcache`.
+# If you omit that part, the command will be run as root.
+exec /sbin/setuser dataloop /opt/dataloop/embedded/bin/python \
+     /opt/dataloop/embedded/bin/metrics.py -a $API_KEY \
+     >>/var/log/dataloop/metrics.log 2>&1
