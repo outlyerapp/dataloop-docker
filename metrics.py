@@ -3,7 +3,8 @@ import requests
 import uuid
 from time import sleep
 import socket
-import sys,getopt
+import sys, getopt
+import multiprocessing
 
 API_KEY = ''  # You need to set this!
 EXCHANGE = 'https://agent.dataloop.io'
@@ -12,6 +13,8 @@ CADVISOR = 'http://127.0.0.1:8080'
 
 GRAPHITE_SERVER = 'graphite.dataloop.io'
 GRAPHITE_PORT = 2003
+
+CORES = multiprocessing.cpu_count()
 
 
 def api_header():
@@ -77,7 +80,6 @@ def send_msg(message):
         print('CRITICAL - something is wrong with %s:%s. Exception is %s' % (GRAPHITE_SERVER, GRAPHITE_PORT, e))
 
 
-
 def main(argv):
     global API_KEY, CADVISOR
 
@@ -107,10 +109,23 @@ def main(argv):
             for container, v in metrics.iteritems():
                 finger = agents[container]
                 flat_metrics[container] = {}
+
+                # populate base metrics
+                base = {
+                    finger + '.base.load_1_min': v[0]['cpu']['load_average'],
+                    finger + '.base.cpu': v[0]['cpu']['usage']['total'] * 1000000000 / CORES,
+                    finger + '.base.memory': v[0]['memory']['usage']
+
+                }
+                flat_metrics[container].update(base)
+
+                # send back everything else
                 for a in v:
                     for m in ['network', 'diskio', 'memory', 'cpu']:
                         z = flatten(a[m], key=m, path=finger)
                         flat_metrics[container].update(z)
+            print flat_metrics
+
 
             for c, d in flat_metrics.iteritems():
                 for path, value in d.iteritems():

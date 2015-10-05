@@ -187,7 +187,7 @@ def main(argv):
                 # ping other running containers
                 if container in agents:
                     finger = agent_name_to_finger(container)
-                    print "pinging container: %s : %s " % (finger, container)
+                    #  print "pinging container: %s : %s " % (finger, container)
                     ping(finger, container)
 
 
