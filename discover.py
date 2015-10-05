@@ -8,7 +8,7 @@ from socket import gethostname
 API_KEY = ''  # You need to set this!
 EXCHANGE = 'https://agent.dataloop.io'
 API = 'https://www.dataloop.io'
-CADVISOR = 'http://192.168.99.100:8080'  # CAdvisor container URL. Change this if on Linux.
+CADVISOR = 'http://127.0.0.1:8080'  # CAdvisor container URL. Change this if on Linux.
 
 # Don't touch anything below this point. In fact don't even scroll down.
 
@@ -113,6 +113,28 @@ def deregister_agent(finger):
     return True
 
 
+def ping(finger, container):
+    # this uses an old api and needs switching over to websocket
+    data = {
+            'mac': get_mac(),
+            'hostname': gethostname(),
+            'tags': '',
+            'os_name': 'docker',
+            'os_version': '',
+            'container_name': '',
+            'proc_list': '',
+            'ip': '',
+            'interfaces': '',
+            'mode': 'solo',
+            'name': container
+    }
+
+    try:
+        return requests.post(API + '/agents/' + finger + '/ping', json=data, headers=api_header())
+    except Exception as E:
+        print "Failed to ping agent: %s" % E
+
+
 def get_containers():
     _containers = []
     try:
@@ -142,12 +164,21 @@ while True:
                 print "adding container: %s" % container
                 create_agent(container)
 
+            # ping other running containers
+            if container in agents:
+                finger = agent_name_to_finger(container)
+                print "pinging container: %s : %s " % (finger, container)
+                ping(finger, container)
+
 
         # delete agents that don't exist as containers
         for agent in agents:
             if agent not in containers:
-                print "deleting agent: %s" % agent
+                #print "deleting agent: %s" % agent
                 finger = agent_name_to_finger(agent)
                 deregister_agent(finger)
+
+
+
 
     sleep(5)  # have a little rest
