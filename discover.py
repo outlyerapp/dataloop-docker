@@ -171,14 +171,14 @@ def main(argv):
     print "Container Auto-Discovery running. Press ctrl+c to exit!"
     while True:
 
-        agents = get_agents() or []
+        agents = get_agents()
         # print "dataloop agents: %s" % len(agents)
 
-        containers = get_containers() or []
+        containers = get_containers()
         # print "cadvisor containers: %s" % len(containers)
 
         # add agents that don't exist in Dataloop
-        if len(containers)>0 or len(agents)>0:
+        if (containers or len(containers)>=0) and (agents or len(agents)>=0):
             for container in containers:
                 if container not in agents:
                     print "adding container: %s" % container
