@@ -34,5 +34,8 @@ ADD discover.run /etc/service/discover/run
 RUN mkdir /etc/service/tag
 ADD tag.run /etc/service/tag/run
 
+# Disable some phusion base services
+RUN rm -rf /etc/service/{cron,sshd,syslog-ng,syslog-forwarder}
+
 # Clean up APT when done.
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
