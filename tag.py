@@ -90,14 +90,14 @@ def main(argv):
         container_tags = get_container_tags()
         # print "container tags: %s" % container_tags
 
-        # # merge tags
+        # merge tags
         tags = {}
         for agent,detail in agent_tags.iteritems():
             # combine lists
             all_tags = container_tags[agent] + detail['tags'] + DEFAULT_TAGS
-        # print "all tags: ", list(set(all_tags)) #dedupe
+            # print "all tags: ", list(set(all_tags)) #dedupe
             diff = list(set(all_tags) - set(detail['tags']))
-        tags[agent] = diff
+            tags[agent] = diff
 
         # push up tags
         for agent, tag_list in tags.iteritems():
