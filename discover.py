@@ -117,7 +117,7 @@ def ping(finger, container):
     # this uses an old api and needs switching over to websocket
     data = {
         'mac': get_mac(),
-        'hostname': gethostname(),
+        'hostname': str(gethostname()),
         'tags': '',
         'os_name': 'docker',
         'os_version': '',
@@ -126,10 +126,10 @@ def ping(finger, container):
         'ip': '',
         'interfaces': '',
         'mode': 'solo',
-        'name': container
+        'name': str(container)
     }
     try:
-        resp = requests.post(API + '/agents/' + finger + '/ping', json=data, headers=api_header())
+        resp = requests.post(API + '/api/agents/' + finger + '/ping', json=data, headers=api_header())
         if resp.status_code != 200:
             print "Failed to update ping for agent %s. Got response code %s!" % (finger, resp.status_code)
     except Exception as E:
