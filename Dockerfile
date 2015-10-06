@@ -30,5 +30,8 @@ ADD metrics.run /etc/service/metrics/run
 RUN mkdir /etc/service/discover
 ADD discover.run /etc/service/discover/run
 
+RUN mkdir /etc/service/tag
+ADD tag.run /etc/service/tag/run
+
 # Clean up APT when done.
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
