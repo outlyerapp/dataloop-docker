@@ -178,7 +178,7 @@ def main(argv):
         # print "cadvisor containers: %s" % len(containers)
 
         # add agents that don't exist in Dataloop
-        if len(containers)>0:
+        if len(containers)>0 or len(agents)>0:
             for container in containers:
                 if container not in agents:
                     print "adding container: %s" % container
@@ -191,8 +191,7 @@ def main(argv):
                     ping(finger, container)
 
 
-        # delete agents that don't exist as containers
-        if len(agents)>0:
+            # delete agents that don't exist as containers
             for agent in agents:
                 if agent not in containers:
                     #print "deleting agent: %s" % agent
