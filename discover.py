@@ -52,7 +52,7 @@ def get_agents():
             if l['mac'] == get_mac():
                 agents.append(l['name'])
 
-        return agents
+        return list(set(agents))
 
     else:
         print "Bad response returning agent list: %s" % _resp.status_code
