@@ -2,6 +2,7 @@
 import requests
 import uuid
 from time import sleep
+import sys,getopt
 
 API_KEY = ''  # You need to set this!
 API = 'https://www.dataloop.io'
@@ -62,27 +63,50 @@ def get_container_tags():
     return _containers
 
 
-print "Container Tag running. Press ctrl+c to exit!"
-while True:
-    agent_tags = get_agent_tags()
-    # print "agent tags: %s" % agent_tags
+def main(argv):
+    global API_KEY, CADVISOR
 
-    container_tags = get_container_tags()
-    # print "container tags: %s" % container_tags
+    try:
+       opts, args = getopt.getopt(argv,"ha:c::",["apikey=","cadvisor="])
+    except getopt.GetoptError:
+       print 'metrics.py -a <apikey> -c <cadvisor address:port>'
+       sys.exit(2)
+    for opt, arg in opts:
+       if opt == '-h':
+          print 'metrics.py -a <apikey> -c <cadvisor address:port>'
+          sys.exit()
+       elif opt in ("-a", "--apikey"):
+          API_KEY = arg
+       elif opt in ("-c", "--cadvisor"):
+          CADVISOR = arg
+    print 'apikey is "', API_KEY , '"'
+    print 'cadvisor endpoint is "', CADVISOR, '"'
 
-    # # merge tags
-    tags = {}
-    for agent,detail in agent_tags.iteritems():
-        # combine lists
-        all_tags = container_tags[agent] + detail['tags'] + DEFAULT_TAGS
-	# print "all tags: ", list(set(all_tags)) #dedupe
-        diff = list(set(all_tags) - set(detail['tags']))
-	tags[agent] = diff
+    print "Container Tag running. Press ctrl+c to exit!"
+    while True:
+        agent_tags = get_agent_tags()
+        # print "agent tags: %s" % agent_tags
 
-    # push up tags
-    for agent, tag_list in tags.iteritems():
-        if len(tag_list) > 0:
-            add_tags(agent_tags[agent]['finger'], tag_list)
+        container_tags = get_container_tags()
+        # print "container tags: %s" % container_tags
+
+        # # merge tags
+        tags = {}
+        for agent,detail in agent_tags.iteritems():
+            # combine lists
+            all_tags = container_tags[agent] + detail['tags'] + DEFAULT_TAGS
+        # print "all tags: ", list(set(all_tags)) #dedupe
+            diff = list(set(all_tags) - set(detail['tags']))
+        tags[agent] = diff
+
+        # push up tags
+        for agent, tag_list in tags.iteritems():
+            if len(tag_list) > 0:
+                add_tags(agent_tags[agent]['finger'], tag_list)
 
 
-    sleep(5)    #  sleepy time
+        sleep(5)    #  sleepy time
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
