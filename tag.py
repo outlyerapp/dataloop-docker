@@ -2,6 +2,7 @@
 import requests
 from time import sleep
 import sys,getopt
+import re
 
 API_KEY = ''  # You need to set this!
 API = 'https://www.dataloop.io'
@@ -67,6 +68,36 @@ def get_container_tags():
     return _containers
 
 
+def get_container_images():
+    try:
+        _resp = requests.get(CADVISOR + '/metrics', stream=True)
+        # print _resp.text
+    except Exception as E:
+        print "Failed to query host machine: %s" % E
+
+    containers = []
+    for line in _resp.iter_lines(1024):
+        if line.startswith("container_start_time"):
+            # print line
+            containers.append(line)
+
+    pairs = []
+    for line in containers:
+        m = re.search("{id\=\"\/docker\/.*}", line)
+        if m:
+            pairs.append(re.findall('\w+\=\"[a-zA-Z0-9_/]+', m.group(0)))
+
+    images = {}
+    for kv in pairs:
+        id = kv[0].split('="/docker/')[1][:12]
+        image = kv[1].split('="')[1]
+        name = kv[2].split('="')[1]
+        images[id] = [ image ]
+
+    return images
+
+
+
 def main(argv):
     global API_KEY, CADVISOR
 
@@ -94,11 +125,14 @@ def main(argv):
         container_tags = get_container_tags()
         # print "container tags: %s" % container_tags
 
+        container_images = get_container_images()
+        # print "container images: %s" % container_images
+
         # merge tags
         tags = {}
         for agent,detail in agent_tags.iteritems():
             # combine lists
-            all_tags = container_tags[agent] + detail['tags'] + DEFAULT_TAGS
+            all_tags = container_tags[agent] + detail['tags'] + DEFAULT_TAGS + container_images[agent]
             # print "all tags: ", list(set(all_tags)) #dedupe
             diff = list(set(all_tags) - set(detail['tags']))
             tags[agent] = diff
