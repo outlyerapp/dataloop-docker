@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import requests
-import uuid
 from time import sleep
 import sys,getopt
 
@@ -17,7 +16,12 @@ def api_header():
 
 
 def get_mac():
-    return str(uuid.getnode())
+    try:
+        _resp = requests.get(CADVISOR + '/api/v1.3/machine').json()
+        return _resp['system_uuid']
+    except Exception as E:
+        print "Failed to query host machine: %s" % E
+        return False
 
 
 def add_tags(fingerprint, tag_list):
