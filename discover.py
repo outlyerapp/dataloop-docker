@@ -47,7 +47,7 @@ def get_agents():
         _resp = requests.get(API + "/api/agents", headers=api_header())
     except Exception as E:
         print "Failed to query agents: %s" % E
-        return False
+        return []
 
     # print "get_agents response: %s " % _resp.text
 
@@ -61,7 +61,7 @@ def get_agents():
 
     else:
         print "Bad response returning agent list: %s" % _resp.status_code
-        return False
+        return []
 
 
 def get_agents_details(finger):
@@ -147,11 +147,43 @@ def get_containers():
         _resp = requests.get(CADVISOR + '/api/v1.3/docker').json()
     except Exception as E:
         print "Failed to query containers: %s" % E
-        return False
+        return []
 
     for k, v in _resp.iteritems():
         _containers.append(v['name'].replace('/docker/', '')[:12])
     return _containers
+
+def sync():
+    agents = containers = []
+    try:
+        agents = get_agents()
+        # print "dataloop agents: %s" % len(agents)
+
+        containers = get_containers()
+        # print "cadvisor containers: %s" % len(containers)
+    except:
+        print "unable to to list containers or agents!"
+
+    # add agents that don't exist in Dataloop
+    for container in containers:
+        if container not in agents:
+            print "adding container: %s" % container
+            create_agent(container)
+
+        # ping other running containers
+        if container in agents:
+            finger = agent_name_to_finger(container)
+            #print "pinging container: %s : %s " % (finger, container)
+            ping(finger, container)
+
+    # delete agents that don't exist as containers
+    for agent in agents:
+        if agent not in containers:
+            #print "deleting agent: %s" % agent
+            finger = agent_name_to_finger(agent)
+            deregister_agent(finger)
+
+
 
 
 def main(argv):
@@ -176,34 +208,7 @@ def main(argv):
     print "Container Auto-Discovery running. Press ctrl+c to exit!"
     while True:
 
-        agents = get_agents()
-        # print "dataloop agents: %s" % len(agents)
-
-        containers = get_containers()
-        # print "cadvisor containers: %s" % len(containers)
-
-        # add agents that don't exist in Dataloop
-        if (containers or len(containers)>=0) and (agents or len(agents)>=0):
-            for container in containers:
-                if container not in agents:
-                    print "adding container: %s" % container
-                    create_agent(container)
-
-                # ping other running containers
-                if container in agents:
-                    finger = agent_name_to_finger(container)
-                    #print "pinging container: %s : %s " % (finger, container)
-                    ping(finger, container)
-
-
-            # delete agents that don't exist as containers
-            for agent in agents:
-                if agent not in containers:
-                    #print "deleting agent: %s" % agent
-                    finger = agent_name_to_finger(agent)
-                    deregister_agent(finger)
-
-
+        sync()
         sleep(5)  # have a little rest
 
 
