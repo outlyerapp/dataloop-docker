@@ -35,7 +35,9 @@ RUN mkdir /etc/service/tag
 ADD tag.run /etc/service/tag/run
 
 # Disable some phusion base services
-RUN rm -rf /etc/service/{cron,sshd,syslog-ng,syslog-forwarder}
+# RUN touch /etc/service/{cron,sshd,syslog-ng,syslog-forwarder}/down
+RUN touch /etc/service/cron/down \
+    && touch /etc/service/syslog-ng/down
 
 # Clean up APT when done.
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
