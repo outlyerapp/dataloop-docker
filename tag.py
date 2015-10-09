@@ -134,7 +134,7 @@ def main(argv):
         for agent, detail in agent_tags.iteritems():
             # combine lists
             if len(container_tags) > 0:
-                all_tags += container_tags[agent]
+                all_tags = container_tags[agent]
             if len(detail) > 0:
                 all_tags += detail['tags']
             if len(DEFAULT_TAGS) > 0:
