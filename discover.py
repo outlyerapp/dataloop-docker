@@ -184,13 +184,11 @@ def sync():
             deregister_agent(finger)
 
 
-
-
 def main(argv):
     global API_KEY, CADVISOR
 
     try:
-        opts, args = getopt.getopt(argv,"ha:c::",["apikey=","cadvisor="])
+        opts, args = getopt.getopt(argv, "ha:c::", ["apikey=", "cadvisor="])
     except getopt.GetoptError:
         print 'discover.py -a <apikey> -c <cadvisor address:port>'
         sys.exit(2)
@@ -202,8 +200,9 @@ def main(argv):
             API_KEY = arg
         elif opt in ("-c", "--cadvisor"):
             CADVISOR = arg
-    print 'apikey is "', API_KEY , '"'
-    print 'cadvisor endpoint is "', CADVISOR, '"'
+
+    print 'apikey is ' + API_KEY
+    print 'cadvisor endpoint is ' + CADVISOR
 
     print "Container Auto-Discovery running. Press ctrl+c to exit!"
     while True:

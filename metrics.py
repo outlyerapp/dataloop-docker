@@ -30,7 +30,7 @@ def get_machine_data():
     try:
         return requests.get(CADVISOR + '/api/v1.3/machine').json()
     except Exception as E:
-        print "Failed to query num_cores: %s" % E
+        print "Failed to query machine data: %s" % E
         return False
 
 
@@ -93,13 +93,8 @@ def main(argv):
 
     global API_KEY, CADVISOR
 
-    # get count of host cpu cores
-    machine_data = get_machine_data()
-    cores = machine_data['num_cores']
-    memory = machine_data['memory_capacity']
-
     try:
-        opts, args = getopt.getopt(argv,"ha:c::",["apikey=","cadvisor="])
+        opts, args = getopt.getopt(argv, "ha:c::", ["apikey=","cadvisor="])
     except getopt.GetoptError:
         print 'metrics.py -a <apikey> -c <cadvisor address:port>'
         sys.exit(2)
@@ -111,8 +106,14 @@ def main(argv):
             API_KEY = arg
         elif opt in ("-c", "--cadvisor"):
             CADVISOR = arg
-    #print 'apikey is "', API_KEY , '"'
-    #print 'cadvisor endpoint is "', CADVISOR, '"'
+
+    # get count of host cpu cores
+    machine_data = get_machine_data()
+    cores = machine_data['num_cores']
+    memory = machine_data['memory_capacity']
+
+    print 'apikey is ' + API_KEY
+    print 'cadvisor endpoint is ' + CADVISOR
 
     print "Container Metric Send running. Press ctrl+c to exit!"
     while True:
