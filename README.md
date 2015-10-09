@@ -46,5 +46,5 @@ docker run --rm -t -i -e API_KEY=<<KEY>> \
 --volume=/var/run:/var/run:rw \
 --volume=/sys:/sys:ro \
 --volume=/var/lib/docker/:/var/lib/docker:ro \
-dataloop-docker:latest /sbin/my_init -- bash -l
+dataloop/dataloop-docker:latest /sbin/my_init -- bash -l
 ```
