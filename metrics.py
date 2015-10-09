@@ -99,18 +99,18 @@ def main(argv):
     memory = machine_data['memory_capacity']
 
     try:
-       opts, args = getopt.getopt(argv,"ha:c::",["apikey=","cadvisor="])
+        opts, args = getopt.getopt(argv,"ha:c::",["apikey=","cadvisor="])
     except getopt.GetoptError:
-       print 'metrics.py -a <apikey> -c <cadvisor address:port>'
-       sys.exit(2)
+        print 'metrics.py -a <apikey> -c <cadvisor address:port>'
+        sys.exit(2)
     for opt, arg in opts:
-       if opt == '-h':
-          print 'metrics.py -a <apikey> -c <cadvisor address:port>'
-          sys.exit()
-       elif opt in ("-a", "--apikey"):
-          API_KEY = arg
-       elif opt in ("-c", "--cadvisor"):
-          CADVISOR = arg
+        if opt == '-h':
+            print 'metrics.py -a <apikey> -c <cadvisor address:port>'
+            sys.exit()
+        elif opt in ("-a", "--apikey"):
+            API_KEY = arg
+        elif opt in ("-c", "--cadvisor"):
+            CADVISOR = arg
     #print 'apikey is "', API_KEY , '"'
     #print 'cadvisor endpoint is "', CADVISOR, '"'
 
