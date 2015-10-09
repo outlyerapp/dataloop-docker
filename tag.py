@@ -30,8 +30,8 @@ def add_tags(fingerprint, tag_list):
     print 'Adding tags: %s to %s' % (','.join(tag_list), fingerprint)
     try:
         requests.put(API + "/api/agents/" + fingerprint + "/tags",
-                            json=data,
-                            headers=api_header())
+                     json=data,
+                     headers=api_header())
     except Exception as E:
         print 'Failed to add tags: %s' % E
         return False
@@ -92,30 +92,30 @@ def get_container_images():
         id = kv[0].split('="/docker/')[1][:12]
         image = kv[1].split('="')[1]
         name = kv[2].split('="')[1]
-        images[id] = [ image ]
+        images[id] = [image]
 
     return images
-
 
 
 def main(argv):
     global API_KEY, CADVISOR
 
     try:
-       opts, args = getopt.getopt(argv,"ha:c::",["apikey=","cadvisor="])
+        opts, args = getopt.getopt(argv,"ha:c::",["apikey=","cadvisor="])
     except getopt.GetoptError:
-       print 'metrics.py -a <apikey> -c <cadvisor address:port>'
-       sys.exit(2)
+        print 'metrics.py -a <apikey> -c <cadvisor address:port>'
+        sys.exit(2)
     for opt, arg in opts:
-       if opt == '-h':
-          print 'metrics.py -a <apikey> -c <cadvisor address:port>'
-          sys.exit()
-       elif opt in ("-a", "--apikey"):
-          API_KEY = arg
-       elif opt in ("-c", "--cadvisor"):
-          CADVISOR = arg
-    print 'apikey is "', API_KEY , '"'
-    print 'cadvisor endpoint is "', CADVISOR, '"'
+        if opt == '-h':
+            print 'metrics.py -a <apikey> -c <cadvisor address:port>'
+            sys.exit()
+        elif opt in ("-a", "--apikey"):
+            API_KEY = arg
+        elif opt in ("-c", "--cadvisor"):
+            CADVISOR = arg
+
+    print 'apikey is ' + API_KEY
+    print 'cadvisor endpoint is ' + CADVISOR
 
     print "Container Tag running. Press ctrl+c to exit!"
     while True:
@@ -130,7 +130,7 @@ def main(argv):
 
         # merge tags
         tags = {}
-        for agent,detail in agent_tags.iteritems():
+        for agent, detail in agent_tags.iteritems():
             # combine lists
             all_tags = container_tags[agent] + detail['tags'] + DEFAULT_TAGS + container_images[agent]
             # print "all tags: ", list(set(all_tags)) #dedupe
