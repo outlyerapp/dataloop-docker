@@ -86,19 +86,19 @@ def create_agent(container):
 
     # Register an agent
     data = {
-            'fingerprint': _finger,
-            'tags': '',
-            'name': container,
-            'hostname': gethostname(),
-            'mac': get_mac(),
-            'os_name': 'docker',
-            'os_version': '',
-            'container': '',
-            'processes': '',
-            'interfaces': '',
-            'mode': 'solo',
-            'version': '',
-            'interpreter': ''
+        'fingerprint': _finger,
+        'tags': '',
+        'name': container,
+        'hostname': gethostname(),
+        'mac': get_mac(),
+        'os_name': 'docker',
+        'os_version': '',
+        'container': '',
+        'processes': '',
+        'interfaces': '',
+        'mode': 'solo',
+        'version': '',
+        'interpreter': ''
     }
 
     resp = register_agent(_finger, data)
@@ -190,18 +190,18 @@ def main(argv):
     global API_KEY, CADVISOR
 
     try:
-       opts, args = getopt.getopt(argv,"ha:c::",["apikey=","cadvisor="])
+        opts, args = getopt.getopt(argv,"ha:c::",["apikey=","cadvisor="])
     except getopt.GetoptError:
-       print 'metrics.py -a <apikey> -c <cadvisor address:port>'
-       sys.exit(2)
+        print 'discover.py -a <apikey> -c <cadvisor address:port>'
+        sys.exit(2)
     for opt, arg in opts:
-       if opt == '-h':
-          print 'metrics.py -a <apikey> -c <cadvisor address:port>'
-          sys.exit()
-       elif opt in ("-a", "--apikey"):
-          API_KEY = arg
-       elif opt in ("-c", "--cadvisor"):
-          CADVISOR = arg
+        if opt == '-h':
+            print 'discover.py -a <apikey> -c <cadvisor address:port>'
+            sys.exit()
+        elif opt in ("-a", "--apikey"):
+            API_KEY = arg
+        elif opt in ("-c", "--cadvisor"):
+            CADVISOR = arg
     print 'apikey is "', API_KEY , '"'
     print 'cadvisor endpoint is "', CADVISOR, '"'
 
