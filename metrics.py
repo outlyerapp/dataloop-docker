@@ -127,22 +127,28 @@ def main(argv):
                 finger = agents[container]
                 flat_metrics[container] = {}
 
+                samples = len(v) - 1
+
                 # 60 samples in a list at 1 second interval. 59 being most recent.
-                cpu_total_now = v[59]['cpu']['usage']['total']
-                cpu_total_prev = v[49]['cpu']['usage']['total']
+                try:
+                    cpu_total_now = v[samples]['cpu']['usage']['total']
+                    cpu_total_prev = v[samples - 10]['cpu']['usage']['total']
 
-                # calculate the cpu difference over 10 seconds then calculate rate
-                cpu_total_delta = cpu_total_now - cpu_total_prev
-                cpu_total_rate = cpu_total_delta / 10
+                    # calculate the cpu difference over 10 seconds then calculate rate
+                    cpu_total_delta = cpu_total_now - cpu_total_prev
+                    cpu_total_rate = cpu_total_delta / 10
 
-                # total amount of cpu is number of billionths of a core
-                total_compute_available = cores * 1000000000
+                    # total amount of cpu is number of billionths of a core
+                    total_compute_available = cores * 1000000000
 
-                # now you can work out percentage cpu used per second
-                cpu_percent = cpu_total_rate / total_compute_available * 100
+                    # now you can work out percentage cpu used per second
+                    cpu_percent = cpu_total_rate / total_compute_available * 100
+
+                except:
+                    cpu_percent = 0
 
                 # get most recent memory percentage
-                memory_percent = v[59]['memory']['usage'] / memory * 100
+                memory_percent = v[samples]['memory']['usage'] / memory * 100
 
                 # populate base metrics
                 base = {
