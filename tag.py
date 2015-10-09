@@ -130,11 +130,11 @@ def main(argv):
 
         # merge tags
         tags = {}
-        all_tags = []
         for agent, detail in agent_tags.iteritems():
+            all_tags = []
             # combine lists
             if len(container_tags) > 0:
-                all_tags = container_tags[agent]
+                all_tags += container_tags[agent]
             if len(detail) > 0:
                 all_tags += detail['tags']
             if len(DEFAULT_TAGS) > 0:
