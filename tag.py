@@ -101,7 +101,7 @@ def main(argv):
     global API_KEY, CADVISOR
 
     try:
-        opts, args = getopt.getopt(argv,"ha:c::",["apikey=","cadvisor="])
+        opts, args = getopt.getopt(argv, "ha:c::", ["apikey=", "cadvisor="])
     except getopt.GetoptError:
         print 'metrics.py -a <apikey> -c <cadvisor address:port>'
         sys.exit(2)
@@ -120,19 +120,28 @@ def main(argv):
     print "Container Tag running. Press ctrl+c to exit!"
     while True:
         agent_tags = get_agent_tags()
-        # print "agent tags: %s" % agent_tags
+        #print "agent tags: %s" % agent_tags
 
         container_tags = get_container_tags()
-        # print "container tags: %s" % container_tags
+        #print "container tags: %s" % container_tags
 
         container_images = get_container_images()
-        # print "container images: %s" % container_images
+        #print "container images: %s" % container_images
 
         # merge tags
         tags = {}
+        all_tags = []
         for agent, detail in agent_tags.iteritems():
             # combine lists
-            all_tags = container_tags[agent] + detail['tags'] + DEFAULT_TAGS + container_images[agent]
+            if len(container_tags) > 0:
+                all_tags += container_tags[agent]
+            if len(detail) > 0:
+                all_tags += detail['tags']
+            if len(DEFAULT_TAGS) > 0:
+                all_tags += DEFAULT_TAGS
+            if len(container_images) > 0:
+                all_tags += container_images[agent]
+
             # print "all tags: ", list(set(all_tags)) #dedupe
             diff = list(set(all_tags) - set(detail['tags']))
             tags[agent] = diff
