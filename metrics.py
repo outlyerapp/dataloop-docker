@@ -181,7 +181,7 @@ def main(argv):
                 for path, value in d.iteritems():
                     if isinstance(value, int) or isinstance(value, float):
                         message = "%s %s\n" % (path, value)
-                        print message
+                        #print message
                         send_msg(message)
 
         sleep(10)    #  sleepy time
