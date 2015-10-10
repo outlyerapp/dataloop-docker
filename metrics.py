@@ -130,33 +130,45 @@ def main(argv):
                 samples = len(v) - 1
 
                 # 60 samples in a list at 1 second interval. 59 being most recent.
-                try:
-                    cpu_total_now = v[samples]['cpu']['usage']['total']
-                    cpu_total_prev = v[samples - 10]['cpu']['usage']['total']
+                cpu_total_now = v[samples]['cpu']['usage']['total']
+                cpu_total_prev = v[samples - 10]['cpu']['usage']['total']
 
-                    # calculate the cpu difference over 10 seconds then calculate rate
-                    cpu_total_delta = cpu_total_now - cpu_total_prev
-                    cpu_total_rate = cpu_total_delta / 10
+                # calculate the cpu difference over 10 seconds then calculate rate
+                cpu_total_delta = cpu_total_now - cpu_total_prev
+                cpu_total_rate = cpu_total_delta / 10
 
-                    # total amount of cpu is number of billionths of a core
-                    total_compute_available = cores * 1000000000
+                # total amount of cpu is number of billionths of a core
+                total_compute_available = cores * 1000000000
 
-                    # now you can work out percentage cpu used per second
-                    cpu_percent = cpu_total_rate / total_compute_available * 100
-
-                except:
-                    cpu_percent = 0
+                # now you can work out percentage cpu used per second
+                cpu_percent = (float(cpu_total_rate) / float(total_compute_available)) * 100
 
                 # get most recent memory percentage
-                memory_percent = v[samples]['memory']['usage'] / memory * 100
+                memory_percent = (float(v[samples]['memory']['usage']) / float(memory)) * 100
+
+                # network stats
+
+                network_tx_now = v[samples]['network']['tx_bytes']
+                network_tx_prev = v[samples - 10]['network']['tx_bytes']
+                network_tx_kps = ((float(network_tx_now) - float(network_tx_prev) * 1024) / 10)
+
+                network_rx_now = v[samples]['network']['rx_bytes']
+                network_rx_prev = v[samples - 10]['network']['rx_bytes']
+                network_rx_kps = ((float(network_rx_now) - float(network_rx_prev) * 1024) / 10)
 
                 # populate base metrics
+                # load avg is current broken as per : https://github.com/google/cadvisor/issues/748
                 base = {
                     finger + '.base.load_1_min': v[0]['cpu']['load_average'],
                     finger + '.base.cpu': cpu_percent,
-                    finger + '.base.memory': memory_percent
-
+                    finger + '.base.memory': memory_percent,
+                    finger + '.base.swap': 0,
+                    finger + '.base.net_upload': network_tx_kps,
+                    finger + '.base.net_download': network_rx_kps
                 }
+
+                # print base
+
                 flat_metrics[container].update(base)
 
                 # send back everything else
