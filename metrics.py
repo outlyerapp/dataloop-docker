@@ -41,7 +41,7 @@ def flatten(structure, key="", path="", flattened=None):
         flattened[((path + ".") if path else "") + key] = structure
     elif isinstance(structure, list):
         for i, item in enumerate(structure):
-            flatten(item, "%s" % i, path + "." + key, flattened)
+            flatten(item, "%d" % i, path + "." + key, flattened)
     else:
         for new_key, value in structure.items():
             flatten(value, new_key, path + "." + key, flattened)
@@ -181,6 +181,7 @@ def main(argv):
                 for path, value in d.iteritems():
                     if isinstance(value, int) or isinstance(value, float):
                         message = "%s %s\n" % (path, value)
+                        print message
                         send_msg(message)
 
         sleep(10)    #  sleepy time
