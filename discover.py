@@ -18,8 +18,8 @@ CADVISOR = 'http://127.0.0.1:8080'
 
 # Don't touch anything below this point. In fact don't even scroll down.
 
-if os.path.isfile('/fsroot/var/run/docker.sock'):
-    docker_cli = Client(base_url='/fsroot/var/run/docker.sock', version='auto')
+if os.path.exists('/rootfs/var/run/docker.sock'):
+    docker_cli = Client(base_url='unix://rootfs/var/run/docker.sock', version='auto')
 else:
     docker_cli = Client(**kwargs_from_env(assert_hostname=False))
 
@@ -170,7 +170,7 @@ def get_processes(container):
         process_list = []
         processes = docker_cli.top(container)['Processes']
         for process in processes:
-            process_list.append(process[2] + ':1')
+            process_list.append(process[len(process) -1] + ':1')
         return process_list
 
     except Exception as E:
