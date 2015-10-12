@@ -152,7 +152,7 @@ def get_containers():
         _resp = requests.get(CADVISOR + '/api/v1.3/docker').json()
         for k, v in _resp.iteritems():
             _containers.append(v['name'].replace('/docker/', '')[:12])
-            return _containers
+        return _containers
 
     except Exception as E:
         print "Failed to query containers: %s" % E
