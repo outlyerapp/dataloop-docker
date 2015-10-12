@@ -98,7 +98,7 @@ def create_agent(container):
             'os_version': '',
             'container': '',
             'processes': get_processes(container),
-            'interfaces': '',
+            'interfaces': get_network(container),
             'mode': 'solo',
             'version': '',
             'interpreter': ''
@@ -133,7 +133,7 @@ def ping(container):
         'container_name': '',
         'proc_list': get_processes(container),
         'ip': '',
-        'interfaces': '',
+        'interfaces': get_network(container),
         'mode': 'solo',
         'name': str(container)
     }
@@ -169,6 +169,40 @@ def get_processes(container):
 
     except Exception as E:
         print "Failed to query processes: %s" % E
+        return []
+
+
+def get_network(container):
+    try:
+        network_settings = docker_cli.inspect_container(container)['NetworkSettings']
+        interface = [
+            {
+                'interface': 'eth0',
+                'addresses': [
+                    {
+                        'ips': [
+                            network_settings['IPAddress']
+                        ],
+                        'family': 'AF_INET'
+                    }
+                ]
+            },
+            {
+                'interface': 'lo0',
+                'addresses': [
+                    {
+                        'ips': [
+                            '127.0.0.1'
+                        ],
+                        'family': 'AF_INET'
+                    }
+                ]
+            }
+        ]
+        return interface
+
+    except Exception as E:
+        print "Failed to query network interfaces: %s" % E
         return []
 
 
