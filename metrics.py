@@ -150,11 +150,11 @@ def main(argv):
 
                 network_tx_now = v[samples]['network']['tx_bytes']
                 network_tx_prev = v[samples - 10]['network']['tx_bytes']
-                network_tx_kps = ((float(network_tx_now) - float(network_tx_prev) * 1024) / 10)
+                network_tx_kps = ((network_tx_now - network_tx_prev) / 1024) / 10
 
                 network_rx_now = v[samples]['network']['rx_bytes']
                 network_rx_prev = v[samples - 10]['network']['rx_bytes']
-                network_rx_kps = ((float(network_rx_now) - float(network_rx_prev) * 1024) / 10)
+                network_rx_kps = ((network_rx_now - network_rx_prev) / 1024) / 10
 
                 # populate base metrics
                 # load avg is current broken as per : https://github.com/google/cadvisor/issues/748
@@ -167,7 +167,7 @@ def main(argv):
                     finger + '.base.net_download': network_rx_kps
                 }
 
-                # print base
+                print base
 
                 flat_metrics[container].update(base)
 
