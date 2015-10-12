@@ -1,10 +1,15 @@
 #!/usr/bin/env python
+import sys
+import os
+import getopt
 import requests
 import uuid
 import json
 from time import sleep
 from socket import gethostname
-import sys,getopt
+from docker.client import Client
+from docker.utils import kwargs_from_env
+
 
 API_KEY = ''  # You need to set this!
 EXCHANGE = 'https://agent.dataloop.io'
@@ -12,6 +17,12 @@ API = 'https://www.dataloop.io'
 CADVISOR = 'http://127.0.0.1:8080'
 
 # Don't touch anything below this point. In fact don't even scroll down.
+
+if os.path.isfile('/fsroot/var/run/docker.sock'):
+    docker_cli = Client(base_url='/fsroot/var/run/docker.sock', version='auto')
+else:
+    docker_cli = Client(**kwargs_from_env(assert_hostname=False))
+
 
 def api_header():
     return {"Content-type": "application/json", "Authorization": "Bearer " + API_KEY}
@@ -127,7 +138,7 @@ def ping(finger, container):
         'os_name': 'docker',
         'os_version': '',
         'container_name': '',
-        'proc_list': '',
+        'proc_list': get_processes(container),
         'ip': '',
         'interfaces': '',
         'mode': 'solo',
@@ -153,6 +164,20 @@ def get_containers():
         _containers.append(v['name'].replace('/docker/', '')[:12])
     return _containers
 
+
+def get_processes(container):
+    try:
+        process_list = []
+        processes = docker_cli.top(container)['Processes']
+        for process in processes:
+            process_list.append(process[2] + ':1')
+        return process_list
+
+    except Exception as E:
+        print "Failed to query processes: %s" % E
+        return []
+
+
 def sync():
     agents = containers = []
     try:
@@ -161,6 +186,7 @@ def sync():
 
         containers = get_containers()
         # print "cadvisor containers: %s" % len(containers)
+
     except:
         print "unable to to list containers or agents!"
 
@@ -173,7 +199,7 @@ def sync():
         # ping other running containers
         if container in agents:
             finger = agent_name_to_finger(container)
-            #print "pinging container: %s : %s " % (finger, container)
+            # print "pinging container: %s : %s " % (finger, container)
             ping(finger, container)
 
     # delete agents that don't exist as containers
