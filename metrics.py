@@ -167,7 +167,7 @@ def main(argv):
                     finger + '.base.net_download': network_rx_kps
                 }
 
-                print base
+                #print base
 
                 flat_metrics[container].update(base)
 
