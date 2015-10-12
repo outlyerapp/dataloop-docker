@@ -184,7 +184,7 @@ def main(argv):
                         #print message
                         send_msg(message)
 
-        sleep(10)    #  sleepy time
+        sleep(30)    #  sleepy time
 
 
 
