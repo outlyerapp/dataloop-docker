@@ -5,7 +5,8 @@ Run this container on each of your Docker hosts. It will automatically create an
 
 To run this container:
 ```
-docker run --rm -t -i -e API_KEY=<<KEY>> \
+API_KEY=<<Dataloop API Key>>
+docker run --rm -t -i -e API_KEY=${API_KEY} \
 --volume=/:/rootfs:ro \
 --volume=/var/run:/var/run:rw \
 --volume=/sys:/sys:ro \
