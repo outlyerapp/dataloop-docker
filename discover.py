@@ -44,34 +44,28 @@ def create_finger():
 def agent_name_to_finger(name):
     try:
         _resp = requests.get(API + "/api/agents", headers=api_header()).json()
+        for _agent in _resp:
+            if _agent['name'] == name:
+                return _agent['id']
+
     except Exception as E:
         print "Failed to return agent details: %s" % E
-        return "" # send an empty finger if we don't get one back
-    for _agent in _resp:
-        if _agent['name'] == name:
-            return _agent['id']
+        return ""
 
 
 def get_agents():
-    # only get agents from dataloop that match the mac address of dl-dac container
     try:
+        agents = []
         _resp = requests.get(API + "/api/agents", headers=api_header())
-    except Exception as E:
-        print "Failed to query agents: %s" % E
-        return []
-
-    # print "get_agents response: %s " % _resp.text
-
-    agents = []
-    if _resp.status_code == 200:
-        for l in _resp.json():
-            if l['mac'] == get_mac():
-                agents.append(l['name'])
+        if _resp.status_code == 200:
+            for l in _resp.json():
+                if l['mac'] == get_mac():
+                    agents.append(l['name'])
 
         return list(set(agents))
 
-    else:
-        print "Bad response returning agent list: %s" % _resp.status_code
+    except Exception as E:
+        print "Failed to query agents: %s" % E
         return []
 
 
@@ -91,35 +85,35 @@ def register_agent(finger, data):
 
 
 def create_agent(container):
-    # Generate a fingerprint
-    _finger = create_finger()
-    # print "generated fingerprint: %s" % _finger
+    agents = get_agents()
+    if container not in agents:
+        _finger = create_finger()
+        data = {
+            'fingerprint': _finger,
+            'tags': '',
+            'name': container,
+            'hostname': gethostname(),
+            'mac': get_mac(),
+            'os_name': 'docker',
+            'os_version': '',
+            'container': '',
+            'processes': get_processes(container),
+            'interfaces': '',
+            'mode': 'solo',
+            'version': '',
+            'interpreter': ''
+        }
 
-    # Register an agent
-    data = {
-        'fingerprint': _finger,
-        'tags': '',
-        'name': container,
-        'hostname': gethostname(),
-        'mac': get_mac(),
-        'os_name': 'docker',
-        'os_version': '',
-        'container': '',
-        'processes': '',
-        'interfaces': '',
-        'mode': 'solo',
-        'version': '',
-        'interpreter': ''
-    }
-
-    resp = register_agent(_finger, data)
-    if resp.status_code == 200:
-        print "successfully registered %s" % _finger
+        resp = register_agent(_finger, data)
+        if resp.status_code == 200:
+            print "successfully registered %s" % _finger
+        else:
+            print "registration of %s failed with status code %d" % (_finger, resp.status_code)
     else:
-        print "registration of %s failed with status code %d" % (_finger, resp.status_code)
+        print "tried to create agent that already exists: %s" % container
 
 
-def deregister_agent(finger):
+def de_register_agent(finger):
     try:
         requests.post(EXCHANGE + '/agents/' + finger + '/deregister', headers=api_header())
     except Exception as E:
@@ -129,8 +123,7 @@ def deregister_agent(finger):
     return True
 
 
-def ping(finger, container):
-    # this uses an old api and needs switching over to websocket
+def ping(container):
     data = {
         'mac': get_mac(),
         'hostname': str(gethostname()),
@@ -145,6 +138,7 @@ def ping(finger, container):
         'name': str(container)
     }
     try:
+        finger = agent_name_to_finger(container)
         resp = requests.post(API + '/api/agents/' + finger + '/ping', json=data, headers=api_header())
         if resp.status_code != 200:
             print "Failed to update ping for agent %s. Got response code %s!" % (finger, resp.status_code)
@@ -156,13 +150,13 @@ def get_containers():
     _containers = []
     try:
         _resp = requests.get(CADVISOR + '/api/v1.3/docker').json()
+        for k, v in _resp.iteritems():
+            _containers.append(v['name'].replace('/docker/', '')[:12])
+            return _containers
+
     except Exception as E:
         print "Failed to query containers: %s" % E
         return []
-
-    for k, v in _resp.iteritems():
-        _containers.append(v['name'].replace('/docker/', '')[:12])
-    return _containers
 
 
 def get_processes(container):
@@ -182,32 +176,26 @@ def sync():
     agents = containers = []
     try:
         agents = get_agents()
-        # print "dataloop agents: %s" % len(agents)
-
         containers = get_containers()
-        # print "cadvisor containers: %s" % len(containers)
 
-    except:
-        print "unable to to list containers or agents!"
+    except Exception as E:
+        print "unable to to list containers or agents!: %s" % E
 
-    # add agents that don't exist in Dataloop
+    # add agents that don't exist
     for container in containers:
         if container not in agents:
             print "adding container: %s" % container
             create_agent(container)
 
-        # ping other running containers
+        # ping running containers
         if container in agents:
-            finger = agent_name_to_finger(container)
-            # print "pinging container: %s : %s " % (finger, container)
-            ping(finger, container)
+            ping(container)
 
     # delete agents that don't exist as containers
     for agent in agents:
         if agent not in containers:
-            #print "deleting agent: %s" % agent
             finger = agent_name_to_finger(agent)
-            deregister_agent(finger)
+            de_register_agent(finger)
 
 
 def main(argv):
@@ -227,16 +215,17 @@ def main(argv):
         elif opt in ("-c", "--cadvisor"):
             CADVISOR = arg
 
-    print 'apikey is ' + API_KEY
-    print 'cadvisor endpoint is ' + CADVISOR
+    print 'apikey: ' + API_KEY
+    print 'cadvisor endpoint: ' + CADVISOR
+    print 'initial containers: ' + str(get_containers())
+    print 'initial agents: ' + str(get_agents())
 
     print "Container Auto-Discovery running. Press ctrl+c to exit!"
     while True:
 
         sync()
-        sleep(5)  # have a little rest
+        sleep(5)
 
 
 if __name__ == "__main__":
     main(sys.argv[1:])
-
