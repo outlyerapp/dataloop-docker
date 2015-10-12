@@ -20,11 +20,6 @@ RUN chmod +x /opt/dataloop/embedded/bin/cadvisor
 RUN mkdir /etc/service/cadvisor
 ADD cadvisor.run /etc/service/cadvisor/run
 
-ADD https://download.dataloop.io/linux/cadvisor-companion /usr/bin/cadvisor-companion
-RUN chmod +x /usr/bin/cadvisor-companion
-RUN mkdir /etc/service/cadvisor-companion
-ADD cadvisor-companion.run /etc/service/cadvisor-companion/run
-
 # Scripts!
 COPY discover.py /opt/dataloop/embedded/bin/discover.py
 COPY metrics.py /opt/dataloop/embedded/bin/metrics.py
