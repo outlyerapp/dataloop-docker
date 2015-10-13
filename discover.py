@@ -139,9 +139,10 @@ def ping(container):
     }
     try:
         finger = agent_name_to_finger(container)
-        resp = requests.post(API + '/api/agents/' + finger + '/ping', json=data, headers=api_header())
-        if resp.status_code != 200:
-            print "Failed to update ping for agent %s. Got response code %s!" % (finger, resp.status_code)
+        if len(finger) > 0:
+            resp = requests.post(API + '/api/agents/' + finger + '/ping', json=data, headers=api_header())
+            if resp.status_code != 200:
+                print "Failed to update ping for agent %s. Got response code %s!" % (finger, resp.status_code)
     except Exception as E:
         print "Failed to register ping for agent: %s" % E
 
