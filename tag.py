@@ -87,13 +87,21 @@ def get_container_images():
 
         pairs = []
         for line in containers:
-            m = re.search("{id\=\"\/docker\/.*}", line)
-            if m:
-                pairs.append(re.findall('\w+\=\"[a-zA-Z0-9_/]+', m.group(0)))
+            match1 = re.search("{id\=\"\/docker\/.*}", line)
+            if match1:
+                pairs.append(re.findall('\w+\=\"[a-zA-Z0-9_/]+', match1.group(0)))
+
+            match2 = re.search("{id\=\"\/system.slice/docker-.*}", line)
+            if match2:
+                pairs.append(re.findall('\w+\=\"[a-zA-Z0-9_/.\-]+', match2.group(0)))
 
         images = {}
         for kv in pairs:
-            id = kv[0].split('="/docker/')[1][:12]
+            if 'system.slice' in kv[0]:
+                id = kv[0].split('="/system.slice/docker-'.replace('.scope', ''))[1][:12]
+            else:
+                id = kv[0].split('="/docker/')[1][:12]
+
             image = kv[1].split('="')[1]
             name = kv[2].split('="')[1]
             images[id] = [image]
