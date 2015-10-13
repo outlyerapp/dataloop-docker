@@ -151,7 +151,10 @@ def get_containers():
     try:
         _resp = requests.get(CADVISOR + '/api/v1.3/docker').json()
         for k, v in _resp.iteritems():
-            _containers.append(v['name'].replace('/docker/', '')[:12])
+            if 'system.slice' in v['name']:
+                _containers.append(v['name'].replace('/system.slice/docker-', '')[:12])
+            else:
+                _containers.append(v['name'].replace('/docker/', '')[:12])
         return _containers
 
     except Exception as E:

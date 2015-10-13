@@ -61,19 +61,22 @@ def get_agents():
 
 
 def get_metrics():
-    _containers = []
     _metrics = {}
     try:
         _resp = requests.get(CADVISOR + '/api/v1.3/docker').json()
-    except Exception as E:
-        print "Failed to query containers: %s" % E
-        return False
+        for k, v in _resp.iteritems():
+            if 'system.slice' in v['name']:
+                name = (v['name'].replace('/system.slice/docker-', '')[:12])
+            else:
+                name = v['name'].replace('/docker/', '')[:12]
 
-    for k, v in _resp.iteritems():
-        _containers.append(v['name'].replace('/docker/', '')[:12])
-        name = v['name'].replace('/docker/', '')[:12]
-        _metrics[name] = v['stats']
-    return _metrics
+            _metrics[name] = v['stats']
+
+        return _metrics
+
+    except Exception as E:
+        print "Failed to query metrics: %s" % E
+        return False
 
 
 # send metrics to graphite
@@ -112,8 +115,8 @@ def main(argv):
     cores = machine_data['num_cores']
     memory = machine_data['memory_capacity']
 
-    print 'apikey is ' + API_KEY
-    print 'cadvisor endpoint is ' + CADVISOR
+    print 'apikey: ' + API_KEY
+    print 'cadvisor endpoint: ' + CADVISOR
 
     print "Container Metric Send running. Press ctrl+c to exit!"
     while True:
