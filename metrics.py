@@ -123,7 +123,7 @@ def main(argv):
     print 'apikey: ' + API_KEY
     print 'api url: ' + API_URL
     print 'graphite server: ' + GRAPHITE_SERVER
-    print 'graphite port ' + GRAPHITE_PORT
+    print 'graphite port: %d ' % GRAPHITE_PORT
     print 'cadvisor endpoint: ' + CADVISOR
 
     print "Container Metric Send running. Press ctrl+c to exit!"
