@@ -13,7 +13,7 @@ from docker.utils import kwargs_from_env
 
 API_KEY = ''  # You need to set this!
 EXCHANGE = 'https://agent.dataloop.io'
-API = 'https://www.dataloop.io'
+API_URL = 'https://www.dataloop.io'
 CADVISOR = 'http://127.0.0.1:8080'
 
 # Don't touch anything below this point. In fact don't even scroll down.
@@ -43,7 +43,7 @@ def create_finger():
 
 def agent_name_to_finger(name):
     try:
-        _resp = requests.get(API + "/api/agents", headers=api_header()).json()
+        _resp = requests.get(API_URL + "/api/agents", headers=api_header()).json()
         for _agent in _resp:
             if _agent['name'] == name:
                 return _agent['id']
@@ -56,7 +56,7 @@ def agent_name_to_finger(name):
 def get_agents():
     try:
         agents = []
-        _resp = requests.get(API + "/api/agents", headers=api_header())
+        _resp = requests.get(API_URL + "/api/agents", headers=api_header())
         if _resp.status_code == 200:
             for l in _resp.json():
                 if l['mac'] == get_mac():
@@ -70,7 +70,7 @@ def get_agents():
 
 
 def get_agents_details(finger):
-    _resp = requests.get(API + "/api/agents/" + finger, headers=api_header())
+    _resp = requests.get(API_URL + "/api/agents/" + finger, headers=api_header())
     if _resp.status_code == 200:
         return json.loads(_resp.text)
     else:
@@ -140,7 +140,7 @@ def ping(container):
     try:
         finger = agent_name_to_finger(container)
         if len(finger) > 0:
-            resp = requests.post(API + '/api/agents/' + finger + '/ping', json=data, headers=api_header())
+            resp = requests.post(API_URL + '/api/agents/' + finger + '/ping', json=data, headers=api_header())
             if resp.status_code != 200:
                 print "Failed to update ping for agent %s. Got response code %s!" % (finger, resp.status_code)
     except Exception as E:
@@ -237,23 +237,26 @@ def sync():
 
 
 def main(argv):
-    global API_KEY, CADVISOR
+    global API_KEY, CADVISOR, API_URL
 
     try:
-        opts, args = getopt.getopt(argv, "ha:c::", ["apikey=", "cadvisor="])
+        opts, args = getopt.getopt(argv, "ha:c:u::", ["apikey=", "cadvisor=", "apiurl="])
     except getopt.GetoptError:
-        print 'discover.py -a <apikey> -c <cadvisor address:port>'
+        print 'discover.py -a <apikey> -c <cadvisor address:port> -u <dataloop address:port>'
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print 'discover.py -a <apikey> -c <cadvisor address:port>'
+            print 'discover.py -a <apikey> -c <cadvisor address:port> -u <dataloop address:port>'
             sys.exit()
         elif opt in ("-a", "--apikey"):
             API_KEY = arg
         elif opt in ("-c", "--cadvisor"):
             CADVISOR = arg
+        elif opt in ("-u", "--apiurl"):
+            API_URL = arg
 
     print 'apikey: ' + API_KEY
+    print 'api url: ' + API_URL
     print 'cadvisor endpoint: ' + CADVISOR
     print 'initial containers: ' + str(get_containers())
     print 'initial agents: ' + str(get_agents())

@@ -6,7 +6,7 @@ import sys, getopt
 
 API_KEY = ''  # You need to set this!
 EXCHANGE = 'https://agent.dataloop.io'
-API = 'https://www.dataloop.io'
+API_URL = 'https://www.dataloop.io'
 CADVISOR = 'http://127.0.0.1:8080'
 
 GRAPHITE_SERVER = 'graphite.dataloop.io'
@@ -50,7 +50,7 @@ def flatten(structure, key="", path="", flattened=None):
 
 def get_agents():
     # only get agents from dataloop that match the mac address of dl-dac container
-    _resp = requests.get(API + "/api/agents", headers=api_header())
+    _resp = requests.get(API_URL + "/api/agents", headers=api_header())
     agents = {}
     if _resp.status_code == 200:
         for l in _resp.json():
@@ -94,21 +94,23 @@ def send_msg(message):
 
 def main(argv):
 
-    global API_KEY, CADVISOR
+    global API_KEY, CADVISOR, API_URL
 
     try:
-        opts, args = getopt.getopt(argv, "ha:c::", ["apikey=","cadvisor="])
+        opts, args = getopt.getopt(argv, "ha:c:u::", ["apikey=", "cadvisor=", "apiurl="])
     except getopt.GetoptError:
-        print 'metrics.py -a <apikey> -c <cadvisor address:port>'
+        print 'metrics.py -a <apikey> -c <cadvisor address:port>  -u <dataloop address:port>'
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print 'metrics.py -a <apikey> -c <cadvisor address:port>'
+            print 'metrics.py -a <apikey> -c <cadvisor address:port>  -u <dataloop address:port>'
             sys.exit()
         elif opt in ("-a", "--apikey"):
             API_KEY = arg
         elif opt in ("-c", "--cadvisor"):
             CADVISOR = arg
+        elif opt in ("-u", "--apiurl"):
+            API_URL = arg
 
     # get count of host cpu cores
     machine_data = get_machine_data()
@@ -116,6 +118,7 @@ def main(argv):
     memory = machine_data['memory_capacity']
 
     print 'apikey: ' + API_KEY
+    print 'api url: ' + API_URL
     print 'cadvisor endpoint: ' + CADVISOR
 
     print "Container Metric Send running. Press ctrl+c to exit!"
@@ -184,11 +187,9 @@ def main(argv):
                 for path, value in d.iteritems():
                     if isinstance(value, int) or isinstance(value, float):
                         message = "%s %s\n" % (path, value)
-                        #print message
                         send_msg(message)
 
-        sleep(30)    #  sleepy time
-
+        sleep(30)
 
 
 if __name__ == "__main__":

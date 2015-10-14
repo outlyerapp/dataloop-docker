@@ -6,7 +6,7 @@ import getopt
 import re
 
 API_KEY = ''  # You need to set this!
-API = 'https://www.dataloop.io'
+API_URL = 'https://www.dataloop.io'
 CADVISOR = 'http://127.0.0.1:8080'
 DEFAULT_TAGS = ['docker']
 
@@ -30,7 +30,7 @@ def add_tags(fingerprint, tag_list):
     try:
         data = {'names': ','.join(tag_list)}
         print 'Adding tags: %s to %s' % (','.join(tag_list), fingerprint)
-        requests.put(API + "/api/agents/" + fingerprint + "/tags", json=data, headers=api_header())
+        requests.put(API_URL + "/api/agents/" + fingerprint + "/tags", json=data, headers=api_header())
 
     except Exception as E:
         print 'Failed to add tags: %s' % E
@@ -39,7 +39,7 @@ def add_tags(fingerprint, tag_list):
 
 def get_agent_tags():
     try:
-        _resp = requests.get(API + "/api/agents", headers=api_header())
+        _resp = requests.get(API_URL + "/api/agents", headers=api_header())
         _agents = {}
         if _resp.status_code == 200:
             for l in _resp.json():
@@ -113,23 +113,26 @@ def get_container_images():
 
 
 def main(argv):
-    global API_KEY, CADVISOR
+    global API_KEY, CADVISOR, API_URL
 
     try:
-        opts, args = getopt.getopt(argv, "ha:c::", ["apikey=", "cadvisor="])
+        opts, args = getopt.getopt(argv, "ha:c:u::", ["apikey=", "cadvisor=", "apiurl="])
     except getopt.GetoptError:
-        print 'metrics.py -a <apikey> -c <cadvisor address:port>'
+        print 'metrics.py -a <apikey> -c <cadvisor address:port> -u <dataloop address:port>'
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print 'metrics.py -a <apikey> -c <cadvisor address:port>'
+            print 'metrics.py -a <apikey> -c <cadvisor address:port> -u <dataloop address:port>'
             sys.exit()
         elif opt in ("-a", "--apikey"):
             API_KEY = arg
         elif opt in ("-c", "--cadvisor"):
             CADVISOR = arg
+        elif opt in ("-u", "--apiurl"):
+            API_URL = arg
 
     print 'apikey:' + API_KEY
+    print 'api url: ' + API_URL
     print 'cadvisor endpoint: ' + CADVISOR
 
     print "Container Tag running. Press ctrl+c to exit!"
