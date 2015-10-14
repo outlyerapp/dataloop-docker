@@ -93,16 +93,16 @@ def send_msg(message):
 
 def main(argv):
 
-    global API_KEY, CADVISOR, API_URL
+    global API_KEY, CADVISOR, API_URL, GRAPHITE_SERVER, GRAPHITE_PORT
 
     try:
-        opts, args = getopt.getopt(argv, "ha:c:u::", ["apikey=", "cadvisor=", "apiurl="])
+        opts, args = getopt.getopt(argv, "ha:c:u:s:p::", ["apikey=", "cadvisor=", "apiurl=", "graphiteserver=", "graphiteport="])
     except getopt.GetoptError:
-        print 'metrics.py -a <apikey> -c <cadvisor address:port>  -u <dataloop address:port>'
+        print 'metrics.py -a <apikey> -c <cadvisor address:port>  -u <dataloop address:port> -s <graphite server> -p <graphite port>'
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print 'metrics.py -a <apikey> -c <cadvisor address:port>  -u <dataloop address:port>'
+            print 'metrics.py -a <apikey> -c <cadvisor address:port>  -u <dataloop address:port> -s <graphite server> -p <graphite port>'
             sys.exit()
         elif opt in ("-a", "--apikey"):
             API_KEY = arg
@@ -110,6 +110,10 @@ def main(argv):
             CADVISOR = arg
         elif opt in ("-u", "--apiurl"):
             API_URL = arg
+        elif opt in ("-s", "--graphiteserver"):
+            GRAPHITE_SERVER = arg
+        elif opt in ("-p", "--graphiteport"):
+            GRAPHITE_PORT = int(arg)
 
     # get count of host cpu cores
     machine_data = get_machine_data()
@@ -118,6 +122,8 @@ def main(argv):
 
     print 'apikey: ' + API_KEY
     print 'api url: ' + API_URL
+    print 'graphite server: ' + GRAPHITE_SERVER
+    print 'graphite port ' + GRAPHITE_PORT
     print 'cadvisor endpoint: ' + CADVISOR
 
     print "Container Metric Send running. Press ctrl+c to exit!"
