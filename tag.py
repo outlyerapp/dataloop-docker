@@ -2,8 +2,11 @@
 import requests
 from time import sleep
 import sys
+import os
 import getopt
 import re
+from docker.client import Client
+from docker.utils import kwargs_from_env
 
 API_KEY = ''  # You need to set this!
 API_URL = 'https://www.dataloop.io'
@@ -11,6 +14,11 @@ CADVISOR = 'http://127.0.0.1:8080'
 DEFAULT_TAGS = ['docker']
 
 # Don't touch anything below this point. In fact don't even scroll down.
+
+if os.path.exists('/rootfs/var/run/docker.sock'):
+    docker_cli = Client(base_url='unix://rootfs/var/run/docker.sock', version='auto')
+else:
+    docker_cli = Client(**kwargs_from_env(assert_hostname=False))
 
 
 def api_header():
@@ -76,40 +84,13 @@ def get_container_tags():
         return False
 
 
-def get_container_images():
+def get_container_image(container):
     try:
-        _resp = requests.get(CADVISOR + '/metrics', stream=True)
-        containers = []
-        for line in _resp.iter_lines(1024):
-            if line.startswith("container_start_time"):
-                # print line
-                containers.append(line)
-
-        pairs = []
-        for line in containers:
-            match1 = re.search("{id\=\"\/docker\/.*}", line)
-            if match1:
-                pairs.append(re.findall('\w+\=\"[a-zA-Z0-9_/]+', match1.group(0)))
-
-            match2 = re.search("{id\=\"\/system.slice/docker-.*}", line)
-            if match2:
-                pairs.append(re.findall('\w+\=\"[a-zA-Z0-9_/.\-]+', match2.group(0)))
-
-        images = {}
-        for kv in pairs:
-            if 'system.slice' in kv[0]:
-                id = kv[0].split('="/system.slice/docker-'.replace('.scope', ''))[1][:12]
-            else:
-                id = kv[0].split('="/docker/')[1][:12]
-
-            image = kv[1].split('="')[1]
-            name = kv[2].split('="')[1]
-            images[id] = [image]
-
-        return images
+        return [docker_cli.inspect_container(container)['Config']['Image']]
 
     except Exception as E:
         print "Failed to query images: %s" % E
+        return []
 
 
 def main(argv):
@@ -141,7 +122,6 @@ def main(argv):
 
         agent_tags = get_agent_tags()
         container_tags = get_container_tags()
-        container_images = get_container_images()
 
         tags = {}
 
@@ -153,8 +133,8 @@ def main(argv):
                 all_tags += detail['tags']
             if len(DEFAULT_TAGS) > 0:
                 all_tags += DEFAULT_TAGS
-            if len(container_images) > 0:
-                all_tags += container_images[agent]
+
+            all_tags += get_container_image(agent)
 
             diff = list(set(all_tags) - set(detail['tags']))
             tags[agent] = diff
