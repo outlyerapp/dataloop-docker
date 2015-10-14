@@ -5,7 +5,6 @@ import socket
 import sys, getopt
 
 API_KEY = ''  # You need to set this!
-EXCHANGE = 'https://agent.dataloop.io'
 API_URL = 'https://www.dataloop.io'
 CADVISOR = 'http://127.0.0.1:8080'
 

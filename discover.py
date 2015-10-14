@@ -12,7 +12,7 @@ from docker.utils import kwargs_from_env
 
 
 API_KEY = ''  # You need to set this!
-EXCHANGE = 'https://agent.dataloop.io'
+EXCHANGE_URL = 'https://agent.dataloop.io'
 API_URL = 'https://www.dataloop.io'
 CADVISOR = 'http://127.0.0.1:8080'
 
@@ -79,7 +79,7 @@ def get_agents_details(finger):
 
 def register_agent(finger, data):
     try:
-        return requests.post(EXCHANGE + '/agents/' + finger + '/register', json=data, headers=api_header())
+        return requests.post(EXCHANGE_URL + '/agents/' + finger + '/register', json=data, headers=api_header())
     except Exception as E:
         print "Failed to register agent: %s" % E
 
@@ -115,7 +115,7 @@ def create_agent(container):
 
 def de_register_agent(finger):
     try:
-        requests.post(EXCHANGE + '/agents/' + finger + '/deregister', headers=api_header())
+        requests.post(EXCHANGE_URL + '/agents/' + finger + '/deregister', headers=api_header())
     except Exception as E:
         print "Failed to deregister agent: %s" % E
 
@@ -237,16 +237,16 @@ def sync():
 
 
 def main(argv):
-    global API_KEY, CADVISOR, API_URL
+    global API_KEY, CADVISOR, API_URL, EXCHANGE_URL
 
     try:
-        opts, args = getopt.getopt(argv, "ha:c:u::", ["apikey=", "cadvisor=", "apiurl="])
+        opts, args = getopt.getopt(argv, "ha:c:u:e::", ["apikey=", "cadvisor=", "apiurl=", "exchangeurl="])
     except getopt.GetoptError:
-        print 'discover.py -a <apikey> -c <cadvisor address:port> -u <dataloop address:port>'
+        print 'discover.py -a <apikey> -c <cadvisor address:port> -u <dataloop api address:port> -e <dataloop exchange address:port>'
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print 'discover.py -a <apikey> -c <cadvisor address:port> -u <dataloop address:port>'
+            print 'discover.py -a <apikey> -c <cadvisor address:port> -u <dataloop address:port> -e <dataloop exchange address:port>'
             sys.exit()
         elif opt in ("-a", "--apikey"):
             API_KEY = arg
@@ -254,9 +254,12 @@ def main(argv):
             CADVISOR = arg
         elif opt in ("-u", "--apiurl"):
             API_URL = arg
+        elif opt in ("-e", "--exchangeurl"):
+            EXCHANGE_URL = arg
 
     print 'apikey: ' + API_KEY
     print 'api url: ' + API_URL
+    print 'exchange url: ' + EXCHANGE_URL
     print 'cadvisor endpoint: ' + CADVISOR
     print 'initial containers: ' + str(get_containers())
     print 'initial agents: ' + str(get_agents())
