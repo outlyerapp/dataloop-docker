@@ -1,7 +1,7 @@
 #!/bin/sh
 [ -z "$API_URL" ] && API_URL="https://www.dataloop.io"
 [ -z "$EXCHANGE_URL" ] && EXCHANGE_URL="https://agent.dataloop.io"
-exec /sbin/setuser dataloop /opt/dataloop/embedded/bin/python \
+exec /opt/dataloop/embedded/bin/python \
      /opt/dataloop/embedded/bin/discover.py -a $API_KEY -u $API_URL -e $EXCHANGE_URL \
      >>/var/log/dataloop/discover.log 2>&1
 

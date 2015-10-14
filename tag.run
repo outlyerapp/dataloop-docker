@@ -1,6 +1,6 @@
 #!/bin/sh
 [ -z "$API_URL" ] && API_URL="https://www.dataloop.io"
-exec /sbin/setuser dataloop /opt/dataloop/embedded/bin/python \
+exec /opt/dataloop/embedded/bin/python \
      /opt/dataloop/embedded/bin/tag.py -a $API_KEY -u $API_URL \
      >>/var/log/dataloop/tag.log 2>&1
 
