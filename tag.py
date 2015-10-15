@@ -94,10 +94,15 @@ def get_container_image(container):
 
 
 def get_env_tags(container):
-    env_tags = {}
-    for env_var in docker_cli.inspect_container(container)['Config']['Env']:
-        env_tags[env_var.split('=')[0]] = env_var.split('=')[1]
-    return env_tags
+    try:
+        env_tags = {}
+        for env_var in docker_cli.inspect_container(container)['Config']['Env']:
+            env_tags[env_var.split('=')[0]] = env_var.split('=')[1]
+        return env_tags
+
+    except Exception as E:
+        print "Failed to query env vars: %s" % E
+        return []
 
 
 def main(argv):
@@ -135,7 +140,8 @@ def main(argv):
         for agent, detail in agent_tags.iteritems():
 
             all_tags = []
-            env = get_env_tags(agent)
+            env_vars = get_env_tags(agent)
+            env_vars_to_tag = ['ENV', 'APP_NAME']
 
             if len(container_tags) > 0:
                 all_tags += container_tags[agent]
@@ -146,8 +152,9 @@ def main(argv):
 
             all_tags += get_container_image(agent)
 
-            if 'ENV' in env:
-                all_tags += env['ENV']
+            for var in env_vars_to_tag:
+                if var in env_vars:
+                    all_tags += env_vars[var]
 
             diff = list(set(all_tags) - set(detail['tags']))
             tags[agent] = diff
