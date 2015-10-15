@@ -93,6 +93,13 @@ def get_container_image(container):
         return []
 
 
+def get_env_tags(container):
+    env_tags = {}
+    for env_var in docker_cli.inspect_container(container)['Config']['Env']:
+        env_tags[env_var.split('=')[0]] = env_var.split('=')[1]
+    return env_tags
+
+
 def main(argv):
     global API_KEY, CADVISOR, API_URL
 
@@ -126,7 +133,10 @@ def main(argv):
         tags = {}
 
         for agent, detail in agent_tags.iteritems():
+
             all_tags = []
+            env = get_env_tags(agent)
+
             if len(container_tags) > 0:
                 all_tags += container_tags[agent]
             if len(detail) > 0:
@@ -135,6 +145,9 @@ def main(argv):
                 all_tags += DEFAULT_TAGS
 
             all_tags += get_container_image(agent)
+
+            if 'ENV' in env:
+                all_tags += env['ENV']
 
             diff = list(set(all_tags) - set(detail['tags']))
             tags[agent] = diff
