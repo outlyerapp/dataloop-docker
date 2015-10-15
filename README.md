@@ -15,6 +15,7 @@ sudo docker run -d -e API_KEY=${API_KEY} \
 dataloop/dataloop-docker:latest
 ```
 
+[![](https://badge.imagelayers.io/dataloop/dataloop-docker:latest.svg)](https://imagelayers.io/?images=dataloop/dataloop-docker:latest 'Get your own badge on imagelayers.io')
 
 Contributing Changes
 ====================
