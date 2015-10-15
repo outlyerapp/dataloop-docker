@@ -7,6 +7,7 @@ To run this container:
 ```
 API_KEY=<<Dataloop API Key>>
 sudo docker run -d -e API_KEY=${API_KEY} \
+--name=dataloop-docker \
 --volume=/:/rootfs:ro \
 --volume=/var/run:/var/run:rw \
 --volume=/sys:/sys:ro \
