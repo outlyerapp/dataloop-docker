@@ -50,7 +50,7 @@ def get_agents():
         for l in _resp.json():
             if l['mac'] == get_mac():
                 agents.append(l['name'])
-    return list(set(agents))
+        return list(set(agents))
 
 
 def get_agents_details(finger):
