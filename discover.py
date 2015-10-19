@@ -186,7 +186,7 @@ def sync():
         # delete agents that don't exist as containers
         for agent in agents:
             if agent not in containers:
-                finger = agent_name_to_finger(agent)
+                finger = agent_fingers[agent]
                 de_register_agent(finger)
 
     except Exception as E:
