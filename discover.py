@@ -50,7 +50,6 @@ def get_agents():
         for l in _resp.json():
             if l['mac'] == get_mac():
                 agents.append(l['name'])
-
     return list(set(agents))
 
 
@@ -67,32 +66,28 @@ def register_agent(finger, data):
 
 
 def create_agent(container):
-    agents = get_agents()
-    if container not in agents:
-        _finger = create_finger()
-        data = {
-            'fingerprint': _finger,
-            'tags': '',
-            'name': container,
-            'hostname': gethostname(),
-            'mac': get_mac(),
-            'os_name': 'docker',
-            'os_version': '',
-            'container': '',
-            'processes': get_processes(container),
-            'interfaces': get_network(container),
-            'mode': 'solo',
-            'version': '',
-            'interpreter': ''
-        }
+    _finger = create_finger()
+    data = {
+        'fingerprint': _finger,
+        'tags': '',
+        'name': container,
+        'hostname': gethostname(),
+        'mac': get_mac(),
+        'os_name': 'docker',
+        'os_version': '',
+        'container': '',
+        'processes': get_processes(container),
+        'interfaces': get_network(container),
+        'mode': 'solo',
+        'version': '',
+        'interpreter': ''
+    }
 
-        resp = register_agent(_finger, data)
-        if resp.status_code == 200:
-            print "successfully registered %s" % _finger
-        else:
-            print "registration of %s failed with status code %d" % (_finger, resp.status_code)
+    resp = register_agent(_finger, data)
+    if resp.status_code == 200:
+        print "successfully registered %s" % _finger
     else:
-        print "tried to create agent that already exists: %s" % container
+        print "registration of %s failed with status code %d" % (_finger, resp.status_code)
 
 
 def de_register_agent(finger):
@@ -170,7 +165,8 @@ def get_network(container):
 
 
 def sync():
-    agents = containers = []
+    agents = []
+    containers = []
     try:
         agents = get_agents()
         containers = get_containers()
