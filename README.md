@@ -44,7 +44,7 @@ Polls :8080/health_check for a 200 response code over docker internal network ad
 
 ### Interactive running to debug:
 ```
-docker run --rm -t -i -e API_KEY=<<KEY>> \
+docker run --rm -t -i -e API_KEY=$API_KEY \
 --volume=/:/rootfs:ro \
 --volume=/var/run:/var/run:rw \
 --volume=/sys:/sys:ro \
