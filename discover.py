@@ -211,21 +211,21 @@ def sync():
         agents = get_agents()
         containers = get_containers()
 
-    # add agents that don't exist
-    for container in containers:
-        if container not in agents:
-            print "adding container: %s" % container
-            create_agent(container)
+        # add agents that don't exist
+        for container in containers:
+            if container not in agents:
+                print "adding container: %s" % container
+                create_agent(container)
 
-        # ping running containers
-        if container in agents:
-            ping(container)
+            # ping running containers
+            if container in agents:
+                ping(container)
 
-    # delete agents that don't exist as containers
-    for agent in agents:
-        if agent not in containers:
-            finger = agent_name_to_finger(agent)
-            de_register_agent(finger)
+        # delete agents that don't exist as containers
+        for agent in agents:
+            if agent not in containers:
+                finger = agent_name_to_finger(agent)
+                de_register_agent(finger)
 
     except Exception as E:
         print "unable to to list containers or agents!: %s" % E
