@@ -2,7 +2,8 @@
 import requests
 from time import sleep
 import socket
-import sys, getopt
+import sys
+import getopt
 
 API_KEY = ''  # You need to set this!
 API_URL = 'https://www.dataloop.io'
@@ -17,20 +18,11 @@ def api_header():
 
 
 def get_mac():
-    try:
-        _resp = requests.get(CADVISOR + '/api/v1.3/machine').json()
-        return _resp['system_uuid']
-    except Exception as E:
-        print "Failed to query host machine: %s" % E
-        return False
+    return requests.get(CADVISOR + '/api/v1.3/machine').json()['system_uuid']
 
 
 def get_machine_data():
-    try:
-        return requests.get(CADVISOR + '/api/v1.3/machine').json()
-    except Exception as E:
-        print "Failed to query machine data: %s" % E
-        return False
+    return requests.get(CADVISOR + '/api/v1.3/machine').json()
 
 
 def flatten(structure, key="", path="", flattened=None):
@@ -48,7 +40,6 @@ def flatten(structure, key="", path="", flattened=None):
 
 
 def get_agents():
-    # only get agents from dataloop that match the mac address of dl-dac container
     _resp = requests.get(API_URL + "/api/agents", headers=api_header())
     agents = {}
     if _resp.status_code == 200:
@@ -61,78 +52,34 @@ def get_agents():
 
 def get_metrics():
     _metrics = {}
-    try:
-        _resp = requests.get(CADVISOR + '/api/v1.3/docker').json()
-        for k, v in _resp.iteritems():
-            if 'system.slice' in v['name']:
-                name = (v['name'].replace('/system.slice/docker-', '')[:12])
-            else:
-                name = v['name'].replace('/docker/', '')[:12]
+    _resp = requests.get(CADVISOR + '/api/v1.3/docker').json()
+    for k, v in _resp.iteritems():
+        if 'system.slice' in v['name']:
+            name = (v['name'].replace('/system.slice/docker-', '')[:12])
+        else:
+            name = v['name'].replace('/docker/', '')[:12]
 
-            _metrics[name] = v['stats']
-
-        return _metrics
-
-    except Exception as E:
-        print "Failed to query metrics: %s" % E
-        return False
+        _metrics[name] = v['stats']
+    return _metrics
 
 
-# send metrics to graphite
 def send_msg(message):
-    # print "Sending message:\n%s" % message
-    # return
+    sock = socket.socket()
+    sock.connect((GRAPHITE_SERVER, GRAPHITE_PORT))
+    sock.sendall(message)
+    sock.close()
+
+
+def sync():
     try:
-        sock = socket.socket()
-        sock.connect((GRAPHITE_SERVER, GRAPHITE_PORT))
-        sock.sendall(message)
-        sock.close()
-    except Exception, e:
-        print('CRITICAL - something is wrong with %s:%s. Exception is %s' % (GRAPHITE_SERVER, GRAPHITE_PORT, e))
-
-
-def main(argv):
-
-    global API_KEY, CADVISOR, API_URL, GRAPHITE_SERVER, GRAPHITE_PORT
-
-    try:
-        opts, args = getopt.getopt(argv, "ha:c:u:s:p::", ["apikey=", "cadvisor=", "apiurl=", "graphiteserver=", "graphiteport="])
-    except getopt.GetoptError:
-        print 'metrics.py -a <apikey> -c <cadvisor address:port>  -u <dataloop address:port> -s <graphite server> -p <graphite port>'
-        sys.exit(2)
-    for opt, arg in opts:
-        if opt == '-h':
-            print 'metrics.py -a <apikey> -c <cadvisor address:port>  -u <dataloop address:port> -s <graphite server> -p <graphite port>'
-            sys.exit()
-        elif opt in ("-a", "--apikey"):
-            API_KEY = arg
-        elif opt in ("-c", "--cadvisor"):
-            CADVISOR = arg
-        elif opt in ("-u", "--apiurl"):
-            API_URL = arg
-        elif opt in ("-s", "--graphiteserver"):
-            GRAPHITE_SERVER = arg
-        elif opt in ("-p", "--graphiteport"):
-            GRAPHITE_PORT = int(arg)
-
-    # get count of host cpu cores
-    machine_data = get_machine_data()
-    cores = machine_data['num_cores']
-    memory = machine_data['memory_capacity']
-
-    print 'apikey: ' + API_KEY
-    print 'api url: ' + API_URL
-    print 'graphite server: ' + GRAPHITE_SERVER
-    print 'graphite port: %d ' % GRAPHITE_PORT
-    print 'cadvisor endpoint: ' + CADVISOR
-
-    print "Container Metric Send running. Press ctrl+c to exit!"
-    while True:
+        machine_data = get_machine_data()
+        cores = machine_data['num_cores']
+        memory = machine_data['memory_capacity']
         agents = get_agents() or []
         metrics = get_metrics() or []
 
         flat_metrics = {}
-        if len(agents)>0 and len(metrics)>0:
+        if len(agents) > 0 and len(metrics) > 0:
             for container, v in metrics.iteritems():
 
                 finger = agents[container]
@@ -178,8 +125,6 @@ def main(argv):
                     finger + '.base.net_download': network_rx_kps
                 }
 
-                #print base
-
                 flat_metrics[container].update(base)
 
                 # send back everything else
@@ -194,6 +139,44 @@ def main(argv):
                         message = "%s %s\n" % (path, value)
                         send_msg(message)
 
+    except Exception as E:
+        print "unable to sync metrics!: %s" % E
+
+
+def main(argv):
+
+    global API_KEY, CADVISOR, API_URL, GRAPHITE_SERVER, GRAPHITE_PORT
+
+    try:
+        opts, args = getopt.getopt(argv, "ha:c:u:s:p::", ["apikey=", "cadvisor=", "apiurl=", "graphiteserver=", "graphiteport="])
+    except getopt.GetoptError:
+        print 'metrics.py -a <apikey> -c <cadvisor address:port>  -u <dataloop address:port> -s <graphite server> -p <graphite port>'
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt == '-h':
+            print 'metrics.py -a <apikey> -c <cadvisor address:port>  -u <dataloop address:port> -s <graphite server> -p <graphite port>'
+            sys.exit()
+        elif opt in ("-a", "--apikey"):
+            API_KEY = arg
+        elif opt in ("-c", "--cadvisor"):
+            CADVISOR = arg
+        elif opt in ("-u", "--apiurl"):
+            API_URL = arg
+        elif opt in ("-s", "--graphiteserver"):
+            GRAPHITE_SERVER = arg
+        elif opt in ("-p", "--graphiteport"):
+            GRAPHITE_PORT = int(arg)
+
+    print 'apikey: ' + API_KEY
+    print 'api url: ' + API_URL
+    print 'graphite server: ' + GRAPHITE_SERVER
+    print 'graphite port: %d ' % GRAPHITE_PORT
+    print 'cadvisor endpoint: ' + CADVISOR
+
+    print "Container Metric Send running. Press ctrl+c to exit!"
+
+    while True:
+        sync()
         sleep(30)
 
 

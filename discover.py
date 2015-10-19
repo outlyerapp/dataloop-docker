@@ -167,10 +167,11 @@ def get_network(container):
 
 
 def sync():
-    agents = []
-    containers = []
-    agent_fingers = agent_name_to_finger()
     try:
+        agents = []
+        containers = []
+        agent_fingers = agent_name_to_finger()
+
         agents = get_agents()
         containers = get_containers()
 
@@ -190,7 +191,7 @@ def sync():
                 de_register_agent(finger)
 
     except Exception as E:
-        print "unable to to list containers or agents!: %s" % E
+        print "unable to sync containers or agents!: %s" % E
 
 
 def main(argv):
