@@ -54,19 +54,14 @@ def agent_name_to_finger(name):
 
 
 def get_agents():
-    try:
-        agents = []
-        _resp = requests.get(API_URL + "/api/agents", headers=api_header())
-        if _resp.status_code == 200:
-            for l in _resp.json():
-                if l['mac'] == get_mac():
-                    agents.append(l['name'])
+    agents = []
+    _resp = requests.get(API_URL + "/api/agents", headers=api_header())
+    if _resp.status_code == 200:
+        for l in _resp.json():
+            if l['mac'] == get_mac():
+                agents.append(l['name'])
 
-        return list(set(agents))
-
-    except Exception as E:
-        print "Failed to query agents: %s" % E
-        return []
+    return list(set(agents))
 
 
 def get_agents_details(finger):
@@ -216,9 +211,6 @@ def sync():
         agents = get_agents()
         containers = get_containers()
 
-    except Exception as E:
-        print "unable to to list containers or agents!: %s" % E
-
     # add agents that don't exist
     for container in containers:
         if container not in agents:
@@ -234,6 +226,9 @@ def sync():
         if agent not in containers:
             finger = agent_name_to_finger(agent)
             de_register_agent(finger)
+
+    except Exception as E:
+        print "unable to to list containers or agents!: %s" % E
 
 
 def main(argv):
