@@ -111,11 +111,11 @@ def create_agent(container):
 def de_register_agent(finger):
     try:
         requests.post(EXCHANGE_URL + '/agents/' + finger + '/deregister', headers=api_header())
+        print "successfully deleted agent: %s" % finger
+        return True
     except Exception as E:
         print "Failed to deregister agent: %s" % E
-
-    print "successfully deleted agent: %s" % finger
-    return True
+        return False
 
 
 def ping(container):
