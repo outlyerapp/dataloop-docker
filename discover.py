@@ -225,7 +225,6 @@ def main(argv):
     while True:
 
         sync()
-        print "going round again..\n"
         sleep(5)
 
 
