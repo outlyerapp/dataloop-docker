@@ -4,7 +4,6 @@ from time import sleep
 import sys
 import os
 import getopt
-import re
 from docker.client import Client
 from docker.utils import kwargs_from_env
 

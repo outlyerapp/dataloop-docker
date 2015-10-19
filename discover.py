@@ -29,12 +29,7 @@ def api_header():
 
 
 def get_mac():
-    try:
-        _resp = requests.get(CADVISOR + '/api/v1.3/machine').json()
-        return _resp['system_uuid']
-    except Exception as E:
-        print "Failed to query host machine: %s" % E
-        return False
+    return requests.get(CADVISOR + '/api/v1.3/machine').json()['system_uuid']
 
 
 def create_finger():
@@ -42,15 +37,10 @@ def create_finger():
 
 
 def agent_name_to_finger(name):
-    try:
-        _resp = requests.get(API_URL + "/api/agents", headers=api_header()).json()
-        for _agent in _resp:
-            if _agent['name'] == name:
-                return _agent['id']
-
-    except Exception as E:
-        print "Failed to return agent details: %s" % E
-        return ""
+    _resp = requests.get(API_URL + "/api/agents", headers=api_header()).json()
+    for _agent in _resp:
+        if _agent['name'] == name:
+            return _agent['id']
 
 
 def get_agents():
@@ -73,10 +63,7 @@ def get_agents_details(finger):
 
 
 def register_agent(finger, data):
-    try:
-        return requests.post(EXCHANGE_URL + '/agents/' + finger + '/register', json=data, headers=api_header())
-    except Exception as E:
-        print "Failed to register agent: %s" % E
+    return requests.post(EXCHANGE_URL + '/agents/' + finger + '/register', json=data, headers=api_header())
 
 
 def create_agent(container):
@@ -109,13 +96,8 @@ def create_agent(container):
 
 
 def de_register_agent(finger):
-    try:
-        requests.post(EXCHANGE_URL + '/agents/' + finger + '/deregister', headers=api_header())
-        print "successfully deleted agent: %s" % finger
-        return True
-    except Exception as E:
-        print "Failed to deregister agent: %s" % E
-        return False
+    requests.post(EXCHANGE_URL + '/agents/' + finger + '/deregister', headers=api_header())
+    print "successfully deleted agent: %s" % finger
 
 
 def ping(container):
@@ -132,77 +114,59 @@ def ping(container):
         'mode': 'solo',
         'name': str(container)
     }
-    try:
-        finger = agent_name_to_finger(container)
-        if len(finger) > 0:
-            resp = requests.post(API_URL + '/api/agents/' + finger + '/ping', json=data, headers=api_header())
-            if resp.status_code != 200:
-                print "Failed to update ping for agent %s. Got response code %s!" % (finger, resp.status_code)
-    except Exception as E:
-        print "Failed to register ping for agent: %s" % E
+    finger = agent_name_to_finger(container)
+    if len(finger) > 0:
+        resp = requests.post(API_URL + '/api/agents/' + finger + '/ping', json=data, headers=api_header())
+        if resp.status_code != 200:
+            print "Failed to update ping for agent %s. Got response code %s!" % (finger, resp.status_code)
 
 
 def get_containers():
     _containers = []
-    try:
-        _resp = requests.get(CADVISOR + '/api/v1.3/docker').json()
-        for k, v in _resp.iteritems():
-            if 'system.slice' in v['name']:
-                _containers.append(v['name'].replace('/system.slice/docker-', '')[:12])
-            else:
-                _containers.append(v['name'].replace('/docker/', '')[:12])
-        return _containers
-
-    except Exception as E:
-        print "Failed to query containers: %s" % E
-        return []
+    _resp = requests.get(CADVISOR + '/api/v1.3/docker').json()
+    for k, v in _resp.iteritems():
+        if 'system.slice' in v['name']:
+            _containers.append(v['name'].replace('/system.slice/docker-', '')[:12])
+        else:
+            _containers.append(v['name'].replace('/docker/', '')[:12])
+    return _containers
 
 
 def get_processes(container):
-    try:
-        process_list = []
-        processes = docker_cli.top(container)['Processes']
-        for process in processes:
-            process_list.append(process[len(process) -1] + ':1')
-        return process_list
-
-    except Exception as E:
-        print "Failed to query processes: %s" % E
-        return []
+    process_list = []
+    processes = docker_cli.top(container)['Processes']
+    for process in processes:
+        process_list.append(process[len(process) -1] + ':1')
+    return process_list
 
 
 def get_network(container):
-    try:
-        network_settings = docker_cli.inspect_container(container)['NetworkSettings']
-        interface = [
-            {
-                'interface': 'eth0',
-                'addresses': [
-                    {
-                        'ips': [
-                            network_settings['IPAddress']
-                        ],
-                        'family': 'AF_INET'
-                    }
-                ]
-            },
-            {
-                'interface': 'lo0',
-                'addresses': [
-                    {
-                        'ips': [
-                            '127.0.0.1'
-                        ],
-                        'family': 'AF_INET'
-                    }
-                ]
-            }
-        ]
-        return interface
-
-    except Exception as E:
-        print "Failed to query network interfaces: %s" % E
-        return []
+    network_settings = docker_cli.inspect_container(container)['NetworkSettings']
+    interface = [
+        {
+            'interface': 'eth0',
+            'addresses': [
+                {
+                    'ips': [
+                        network_settings['IPAddress']
+                    ],
+                    'family': 'AF_INET'
+                }
+            ]
+        },
+        {
+            'interface': 'lo0',
+            'addresses': [
+                {
+                    'ips': [
+                        '127.0.0.1'
+                    ],
+                    'family': 'AF_INET'
+                }
+            ]
+        }
+    ]
+    return interface
 
 
 def sync():
