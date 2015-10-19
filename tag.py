@@ -99,7 +99,7 @@ def sync():
 
             for var in env_vars_to_tag:
                 if var in env_vars:
-                    all_tags += env_vars[var]
+                    all_tags += [env_vars[var]]
 
             diff = list(set(all_tags) - set(detail['tags']))
             tags[agent] = diff
