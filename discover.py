@@ -5,6 +5,7 @@ import getopt
 import requests
 import uuid
 import json
+import grequests
 from time import sleep
 from socket import gethostname
 from docker.client import Client
@@ -36,11 +37,12 @@ def create_finger():
     return str(uuid.uuid4())
 
 
-def agent_name_to_finger(name):
+def agent_name_to_finger():
+    agent_fingers = {}
     _resp = requests.get(API_URL + "/api/agents", headers=api_header()).json()
     for _agent in _resp:
-        if _agent['name'] == name:
-            return _agent['id']
+        agent_fingers[_agent['name']] = _agent['id']
+    return agent_fingers
 
 
 def get_agents():
@@ -95,26 +97,26 @@ def de_register_agent(finger):
     print "successfully deleted agent: %s" % finger
 
 
-def ping(container):
-    data = {
-        'mac': get_mac(),
-        'hostname': str(gethostname()),
-        'tags': '',
-        'os_name': 'docker',
-        'os_version': '',
-        'container_name': '',
-        'proc_list': get_processes(container),
-        'ip': '',
-        'interfaces': get_network(container),
-        'mode': 'solo',
-        'name': str(container)
-    }
-    finger = agent_name_to_finger(container)
-    if len(finger) > 0:
-        resp = requests.post(API_URL + '/api/agents/' + finger + '/ping', json=data, headers=api_header())
-        if resp.status_code != 200:
-            print "Failed to update ping for agent %s. Got response code %s!" % (finger, resp.status_code)
-
+def ping(container_list, agent_fingers):
+    rs = []
+    for container in container_list:
+        data = {
+            'mac': get_mac(),
+            'hostname': str(gethostname()),
+            'tags': '',
+            'os_name': 'docker',
+            'os_version': '',
+            'container_name': '',
+            'proc_list': get_processes(container),
+            'ip': '',
+            'interfaces': get_network(container),
+            'mode': 'solo',
+            'name': str(container)
+        }
+        finger = agent_fingers[container]
+        url = API_URL + '/api/agents/' + finger + '/ping'
+        rs.append(grequests.post(url, json=data, headers=api_header()))
+    return grequests.map(rs)
 
 def get_containers():
     _containers = []
@@ -167,6 +169,7 @@ def get_network(container):
 def sync():
     agents = []
     containers = []
+    agent_fingers = agent_name_to_finger()
     try:
         agents = get_agents()
         containers = get_containers()
@@ -177,9 +180,8 @@ def sync():
                 print "adding container: %s" % container
                 create_agent(container)
 
-            # ping running containers
-            if container in agents:
-                ping(container)
+        # ping running containers
+        ping(containers, agent_fingers)
 
         # delete agents that don't exist as containers
         for agent in agents:
@@ -223,6 +225,7 @@ def main(argv):
     while True:
 
         sync()
+        print "going round again..\n"
         sleep(5)
 
 
