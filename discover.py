@@ -118,6 +118,7 @@ def ping(container_list, agent_fingers):
         rs.append(grequests.post(url, json=data, headers=api_header()))
     return grequests.map(rs)
 
+
 def get_containers():
     _containers = []
     _resp = requests.get(CADVISOR + '/api/v1.3/docker').json()
@@ -168,12 +169,9 @@ def get_network(container):
 
 def sync():
     try:
-        agents = []
-        containers = []
-        agent_fingers = agent_name_to_finger()
-
         agents = get_agents()
         containers = get_containers()
+        agent_fingers = agent_name_to_finger()
 
         # add agents that don't exist
         for container in containers:
@@ -191,7 +189,7 @@ def sync():
                 de_register_agent(finger)
 
     except Exception as E:
-        print "unable to sync containers or agents!: %s" % E
+        print "unable to sync containers!: %s" % E
 
 
 def main(argv):
