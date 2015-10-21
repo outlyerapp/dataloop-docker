@@ -2,6 +2,6 @@
 [ -z "$API_URL" ] && API_URL="https://www.dataloop.io"
 [ -z "$EXCHANGE_URL" ] && EXCHANGE_URL="https://agent.dataloop.io"
 exec /opt/dataloop/embedded/bin/python \
-     /opt/dataloop/embedded/bin/discover.py -a $API_KEY -u $API_URL -e $EXCHANGE_URL \
+     /opt/dataloop/embedded/bin/discover2.py -a $API_KEY -u $API_URL -e $EXCHANGE_URL \
      >>/var/log/dataloop/discover.log 2>&1
 
