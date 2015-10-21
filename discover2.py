@@ -56,10 +56,10 @@ def register_sync(ctx):
     agent_ids = get_agents_ids(agents)
 
     containers = get_containers(ctx)
-    container_ids = get_container_ids(containers)
-    logger.debug("containers: %s", container_ids)
+    container_hashes = get_container_hashes(containers)
+    logger.debug("containers: %s", container_hashes)
 
-    dead_containers = agent_ids - container_ids
+    dead_containers = agent_ids - container_hashes
 
     destroy_agents(ctx, dead_containers)
 
@@ -80,8 +80,15 @@ def get_container_ids(containers):
             return c['name'].replace('/system.slice/docker-', '')[:12]
         else:
             return c['name'].replace('/docker/', '')[:12]
+
     return set(map(get_id, containers))
 
+def get_container_hashes(containers):
+
+    def hash(id):
+        return str(uuid.uuid5(uuid_hash, id))
+
+    return set(map(hash, get_container_ids(containers)))
 
 def get_agents(ctx):
     agent_api = ctx['api_host'] + "/api/agents"
@@ -100,7 +107,7 @@ def get_agents(ctx):
 
 def get_agents_ids(agents):
     def agent_name(agent):
-        return agent['name']
+        return agent['id']
 
     return set(map(agent_name, agents))
 
@@ -109,8 +116,7 @@ def destroy_agents(ctx, agent_ids):
     headers = get_request_headers(ctx)
 
     def create_request(id):
-        finger = uuid.uuid5(uuid_hash, id)
-        url = "%s/api/agents/%s/deregister" % (api_host, finger,)
+        url = "%s/api/agents/%s/deregister" % (api_host, id,)
         return grequests.post(url, headers=headers)
 
     reqs = map(create_request, agent_ids)
