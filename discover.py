@@ -4,7 +4,7 @@ import sys
 import time
 import grequests
 import requests
-import lib
+import dl_lib
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +25,7 @@ def register_sync(ctx):
     agents = get_agents(ctx)
     agent_ids = get_agents_ids(agents)
 
-    containers = lib.get_containers(ctx)
+    containers = dl_lib.get_containers(ctx)
     container_hashes = get_container_hashes(containers)
     logger.debug("containers: %s", container_hashes)
 
@@ -35,17 +35,17 @@ def register_sync(ctx):
 
 
 def get_container_hashes(containers):
-    return set(map(lib.hash_id, lib.get_container_ids(containers)))
+    return set(map(dl_lib.hash_id, dl_lib.get_container_ids(containers)))
 
 
 def get_agents(ctx):
     agent_api = ctx['api_host'] + "/api/agents"
 
-    resp = requests.get(agent_api, headers=lib.get_request_headers(ctx))
+    resp = requests.get(agent_api, headers=dl_lib.get_request_headers(ctx))
     resp.raise_for_status()
     agents = resp.json()
 
-    host_mac = lib.get_host_mac(ctx)
+    host_mac = dl_lib.get_host_mac(ctx)
 
     def filter_host(agent):
         return agent['mac'] == host_mac
@@ -62,7 +62,7 @@ def get_agents_ids(agents):
 
 def destroy_agents(ctx, agent_ids):
     api_host = ctx['api_host']
-    headers = lib.get_request_headers(ctx)
+    headers = dl_lib.get_request_headers(ctx)
 
     def create_request(id):
         url = "%s/api/agents/%s/deregister" % (api_host, id,)
