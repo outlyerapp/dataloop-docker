@@ -105,7 +105,7 @@ def main(argv):
 
     while True:
         registration(ctx)
-        time.sleep(ctx['ping_interval'])
+        time.sleep(ctx['register_interval'])
 
 if __name__ == "__main__":
     main(sys.argv[1:])
