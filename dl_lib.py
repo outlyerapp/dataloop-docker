@@ -33,29 +33,37 @@ def hash_id(id):
 def get_containers(ctx):
     cadvisor_url = ctx['cadvisor_host'] + "/api/v1.3/docker"
     resp = requests.get(cadvisor_url).json()
-
-    # # TEST containers
-    # with open('../cadvisor.json') as conts:
-    #     resp = json.load(conts)
-
     return resp.values()
 
 
-def get_container_ids(containers):
-    def get_id(c):
-        if 'system.slice' in c['name']:
-            return c['name'].replace('/system.slice/docker-', '')[:12]
-        else:
-            return c['name'].replace('/docker/', '')[:12]
+def get_container(ctx, container):
+    cadvisor_url = "%s/api/v1.3/%s" % (ctx['cadvisor_host'], container,)
+    return requests.get(cadvisor_url).json()[container]
 
-    return set(map(get_id, containers))
+
+def get_container_paths(containers):
+    def get_path(c):
+        return c['name']
+
+    return set(map(get_path, containers))
+
+def get_container_env_vars(container):
+    env_tags = {}
+    for env_var in docker_cli.inspect_container(container)['Config']['Env']:
+        env_tags[env_var.split('=')[0]] = env_var.split('=')[1]
+    return env_tags
+
+
+def get_container_id(path):
+    if 'system.slice' in path:
+        return path.replace('/system.slice/docker-', '')[:12]
+    else:
+        return path.replace('/docker/', '')[:12]
 
 
 def get_host_mac(ctx):
-    # #TEST code
-    # return "macmacmacmac"
-    cadvisor_url = ctx['cadvisor_host'] + '/api/v1.3/machine'
-    return requests.get(cadvisor_url).json()['system_uuid']
+    machine_url = ctx['cadvisor_host'] + '/api/v1.3/machine'
+    return requests.get(machine_url).json()['system_uuid']
 
 
 def get_processes(container):

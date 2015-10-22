@@ -35,7 +35,7 @@ def register_sync(ctx):
 
 
 def get_container_hashes(containers):
-    return set(map(dl_lib.hash_id, dl_lib.get_container_ids(containers)))
+    return set(map(dl_lib.hash_id, dl_lib.get_container_paths(containers)))
 
 
 def get_agents(ctx):

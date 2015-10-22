@@ -7,29 +7,26 @@ import grequests
 import dl_lib
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(format="%(asctime)s %(levelname)s %(name)s - %(message)s",
-                    datefmt="%Y-%m-%d %H:%M:%S",
-                    stream=sys.stdout,
-                    level=logging.INFO)
 
 
 def ping(ctx):
     logger.debug("pinging")
     try:
         containers = dl_lib.get_containers(ctx)
-        container_ids = dl_lib.get_container_ids(containers)
-        ping_containers(ctx, container_ids)
+        container_paths = dl_lib.get_container_paths(containers)
+        ping_containers(ctx, container_paths)
     except Exception as ex:
-        logger.error("register sync failed: %s" % ex, exc_info=True)
+        logger.error("ping failed: %s" % ex, exc_info=True)
 
 
-def ping_containers(ctx, container_ids):
+def ping_containers(ctx, container_paths):
     api_host = ctx['api_host']
     headers = dl_lib.get_request_headers(ctx)
     host_mac = dl_lib.get_host_mac(ctx)
     host_name = str(socket.gethostname())
 
-    def create_request(id):
+    def create_request(path):
+        id = dl_lib.get_container_id(path)
         details = {
             'mac': host_mac,
             'hostname': host_name,
@@ -41,13 +38,13 @@ def ping_containers(ctx, container_ids):
             'ip': '',
             'interfaces': dl_lib.get_network(id),
             'mode': 'solo',
-            'name': str(id)
+            'name': id
         }
-        finger = dl_lib.hash_id(id)
+        finger = dl_lib.hash_id(path)
         url = "%s/api/agents/%s/ping" % (api_host, finger,)
         return grequests.post(url, json=details, headers=headers)
 
-    reqs = map(create_request, container_ids)
+    reqs = map(create_request, container_paths)
     grequests.map(reqs)
 
 
