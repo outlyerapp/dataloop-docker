@@ -27,7 +27,7 @@ def get_request_headers(ctx):
 
 
 def hash_id(id):
-    str(uuid.uuid5(UUID_HASH, id))
+    return str(uuid.uuid5(UUID_HASH, id))
 
 
 def get_containers(ctx):
