@@ -22,6 +22,7 @@ ADD cadvisor.run /etc/service/cadvisor/run
 
 # Scripts!
 COPY discover.py /opt/dataloop/embedded/bin/discover.py
+COPY presence.py /opt/dataloop/embedded/bin/presence.py
 COPY metrics.py /opt/dataloop/embedded/bin/metrics.py
 COPY tag.py /opt/dataloop/embedded/bin/tag.py
 
@@ -30,6 +31,9 @@ ADD metrics.run /etc/service/metrics/run
 
 RUN mkdir /etc/service/discover
 ADD discover.run /etc/service/discover/run
+
+RUN mkdir /etc/service/presence
+ADD presence.run /etc/service/presence/run
 
 RUN mkdir /etc/service/tag
 ADD tag.run /etc/service/tag/run
