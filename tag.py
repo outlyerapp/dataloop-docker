@@ -48,7 +48,7 @@ def get_tags(ctx, container_path):
 
 def container_aliases(container):
     def not_name(alias):
-        return container['name'] != alias
+        return alias not in container['name']
 
     return filter(not_name, container['aliases'])
 
