@@ -19,13 +19,6 @@ def registration(ctx):
             time.sleep(ctx['register_interval'])
 
 
-def get_request_headers(ctx):
-    return {
-        "Content-type": "application/json",
-        "Authorization": "Bearer " + ctx['api_key']
-    }
-
-
 def register_sync(ctx):
     logger.info("register sync")
 
