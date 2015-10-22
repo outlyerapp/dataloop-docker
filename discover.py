@@ -4,7 +4,7 @@ import sys
 import time
 import grequests
 import requests
-import lib
+import dl_lib
 
 logger = logging.getLogger(__name__)
 

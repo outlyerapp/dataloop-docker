@@ -4,7 +4,7 @@ import socket
 import sys
 import time
 import grequests
-import lib
+import dl_lib
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(format="%(asctime)s %(levelname)s %(name)s - %(message)s",
