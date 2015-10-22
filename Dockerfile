@@ -11,7 +11,7 @@ CMD ["/sbin/my_init"]
 # For the python environment
 RUN curl -s https://download.dataloop.io/pubkey.gpg | apt-key add - \
     && echo 'deb https://download.dataloop.io/deb/ unstable main' > /etc/apt/sources.list.d/dataloop.list \
-    && apt-get update && sudo apt-get install dataloop-agent
+    && apt-get update && sudo apt-get install dataloop-agent && dpkg -l | grep dataloop
 
 
 # TODO: Install cadvisor - link to for now
