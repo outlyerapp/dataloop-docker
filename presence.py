@@ -16,8 +16,8 @@ logging.basicConfig(format="%(asctime)s %(levelname)s %(name)s - %(message)s",
 def ping(ctx):
     logger.debug("pinging")
     try:
-        containers = lib.get_containers(ctx)
-        container_ids = lib.get_container_ids(containers)
+        containers = dl_lib.get_containers(ctx)
+        container_ids = dl_lib.get_container_ids(containers)
         ping_containers(ctx, container_ids)
     except Exception as ex:
         logger.error("register sync failed: %s" % ex, exc_info=True)
@@ -25,8 +25,8 @@ def ping(ctx):
 
 def ping_containers(ctx, container_ids):
     api_host = ctx['api_host']
-    headers = lib.get_request_headers(ctx)
-    host_mac = lib.get_host_mac(ctx)
+    headers = dl_lib.get_request_headers(ctx)
+    host_mac = dl_lib.get_host_mac(ctx)
     host_name = str(socket.gethostname())
 
     def create_request(id):
@@ -37,13 +37,13 @@ def ping_containers(ctx, container_ids):
             'os_name': 'docker',
             'os_version': '',
             'container_name': '',
-            'proc_list': lib.get_processes(id),
+            'proc_list': dl_lib.get_processes(id),
             'ip': '',
-            'interfaces': lib.get_network(id),
+            'interfaces': dl_lib.get_network(id),
             'mode': 'solo',
             'name': str(id)
         }
-        finger = lib.hash_id(id)
+        finger = dl_lib.hash_id(id)
         url = "%s/api/agents/%s/ping" % (api_host, finger,)
         return grequests.post(url, json=details, headers=headers)
 
