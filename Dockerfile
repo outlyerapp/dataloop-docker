@@ -24,6 +24,7 @@ ADD cadvisor.run /etc/service/cadvisor/run
 COPY discover.py /opt/dataloop/embedded/bin/discover.py
 COPY presence.py /opt/dataloop/embedded/bin/presence.py
 COPY metrics.py /opt/dataloop/embedded/bin/metrics.py
+COPY dl_lib.py /opt/dataloop/embedded/bin/dl_lib.py
 COPY tag.py /opt/dataloop/embedded/bin/tag.py
 
 RUN mkdir /etc/service/metrics
