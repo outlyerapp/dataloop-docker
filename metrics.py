@@ -103,7 +103,7 @@ def main(argv):
         "metric_interval": 10,
         "api_host": "https://www.dataloop.io",
         "cadvisor_host": "http://127.0.0.1:8080",
-        "graphite_host": "graphite.dataloop.io:2030"
+        "graphite_host": "graphite.dataloop.io:2003"
     }
 
     try:
