@@ -36,6 +36,11 @@ def get_containers(ctx):
     return resp.values()
 
 
+def get_host_data(ctx):
+    cadvisor_url = ctx['cadvisor_host'] + "/api/v1.3/machine"
+    return requests.get(cadvisor_url).json()
+
+
 def get_container(ctx, container):
     cadvisor_url = "%s/api/v1.3/%s" % (ctx['cadvisor_host'], container,)
     return requests.get(cadvisor_url).json()[container]
@@ -101,3 +106,17 @@ def get_network(container):
         }
     ]
     return interface
+
+
+def flatten(structure, key="", path="", flattened=None):
+    if flattened is None:
+        flattened = {}
+    if type(structure) not in (dict, list):
+        flattened[((path + ".") if path else "") + key] = structure
+    elif isinstance(structure, list):
+        for i, item in enumerate(structure):
+            flatten(item, "%d" % i, path + "." + key, flattened)
+    else:
+        for new_key, value in structure.items():
+            flatten(value, new_key, path + "." + key, flattened)
+    return flattened

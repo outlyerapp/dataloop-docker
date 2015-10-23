@@ -35,6 +35,7 @@ def ping_containers(ctx, container_paths):
             'os_version': '',
             'container_name': '',
             'proc_list': dl_lib.get_processes(id),
+            'container_name': '001',
             'ip': '',
             'interfaces': dl_lib.get_network(id),
             'mode': 'solo',
