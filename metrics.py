@@ -91,8 +91,9 @@ def publish_metrics(ctx, metrics):
     sock.connect((ctx["graphite_host"], ctx["graphite_port"]))
 
     for path, value in metrics.iteritems():
-        message = "%s %s\n" % (path, value)
-        sock.sendall(message)
+        if isinstance(value, int) or isinstance(value, float):
+            message = "%s %s\n" % (path, value)
+            sock.sendall(message)
 
     sock.close()
 
