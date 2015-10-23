@@ -88,8 +88,7 @@ def network_rx_kps(stats):
 
 def publish_metrics(ctx, metrics):
     sock = socket.socket()
-    [host, port] = ctx["graphite_host"].split(':')
-    sock.connect((host, int(port)))
+    sock.connect((ctx["graphite_host"], ctx["graphite_port"]))
 
     for path, value in metrics.iteritems():
         message = "%s %s\n" % (path, value)
@@ -103,17 +102,18 @@ def main(argv):
         "metric_interval": 10,
         "api_host": "https://www.dataloop.io",
         "cadvisor_host": "http://127.0.0.1:8080",
-        "graphite_host": "graphite.dataloop.io:2003"
+        "graphite_host": "graphite.dataloop.io",
+        "graphite_port": 2003
     }
 
     try:
-        opts, args = getopt.getopt(argv, "ha:c:u:g::", ["apikey=", "cadvisor=", "apiurl=", "graphite="])
+        opts, args = getopt.getopt(argv, "ha:c:u:s:p::", ["apikey=", "cadvisor=", "apiurl=", "graphiteserver=", "graphiteport="])
     except getopt.GetoptError:
-        print 'tag.py -a <apikey> -c <cadvisor address:port> -u <dataloop api address:port> -g <graphite endpoint address:port>'
+        print 'metrics.py -a <apikey> -c <cadvisor address:port>  -u <dataloop address:port> -s <graphite server> -p <graphite port>'
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print 'tag.py -a <apikey> -c <cadvisor address:port> -u <dataloop address:port> -g <graphite endpoint address:port>'
+            print 'metrics.py -a <apikey> -c <cadvisor address:port>  -u <dataloop address:port> -s <graphite server> -p <graphite port>'
             sys.exit()
         elif opt in ("-a", "--apikey"):
             ctx['api_key'] = arg
@@ -121,8 +121,11 @@ def main(argv):
             ctx['cadvisor_host'] = arg
         elif opt in ("-u", "--apiurl"):
             ctx['api_host'] = arg
-        elif opt in ("-g", "--graphite"):
+        elif opt in ("-s", "--graphiteserver"):
             ctx['graphite_host'] = arg
+        elif opt in ("-p", "--graphiteport"):
+            ctx['graphite_port'] = int(arg)
+
 
 
     while True:
