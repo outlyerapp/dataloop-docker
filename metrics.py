@@ -126,8 +126,6 @@ def main(argv):
         elif opt in ("-p", "--graphiteport"):
             ctx['graphite_port'] = int(arg)
 
-
-
     while True:
         send_metrics(ctx)
         time.sleep(ctx['metric_interval'])

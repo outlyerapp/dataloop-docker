@@ -3,7 +3,6 @@ import logging
 import sys
 import time
 import grequests
-import requests
 import dl_lib
 
 logger = logging.getLogger(__name__)
@@ -22,8 +21,8 @@ def registration(ctx):
 def register_sync(ctx):
     logger.info("register sync")
 
-    agents = get_agents(ctx)
-    agent_ids = get_agents_ids(agents)
+    agents = dl_lib.get_agents(ctx)
+    agent_ids = dl_lib.get_agents_ids(agents)
 
     containers = dl_lib.get_containers(ctx)
     container_hashes = get_container_hashes(containers)
@@ -36,28 +35,6 @@ def register_sync(ctx):
 
 def get_container_hashes(containers):
     return set(map(dl_lib.hash_id, dl_lib.get_container_paths(containers)))
-
-
-def get_agents(ctx):
-    agent_api = ctx['api_host'] + "/api/agents"
-
-    resp = requests.get(agent_api, headers=dl_lib.get_request_headers(ctx))
-    resp.raise_for_status()
-    agents = resp.json()
-
-    host_mac = dl_lib.get_host_mac(ctx)
-
-    def filter_host(agent):
-        return agent['mac'] == host_mac
-
-    return filter(filter_host, agents)
-
-
-def get_agents_ids(agents):
-    def agent_name(agent):
-        return agent['id']
-
-    return set(map(agent_name, agents))
 
 
 def destroy_agents(ctx, agent_ids):

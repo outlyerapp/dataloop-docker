@@ -30,15 +30,35 @@ def hash_id(id):
     return str(uuid.uuid5(UUID_HASH, id))
 
 
-def get_containers(ctx):
-    cadvisor_url = ctx['cadvisor_host'] + "/api/v1.3/docker"
-    resp = requests.get(cadvisor_url).json()
-    return resp.values()
+def get_agents(ctx):
+    host_mac = get_host_mac(ctx)
+    agent_api = "%s/api/agents" % (ctx['api_host'])
+    resp = requests.get(agent_api, headers=get_request_headers(ctx))
+    resp.raise_for_status()
+    agents = resp.json()
+
+    def filter_host(agent):
+        return agent['mac'] == host_mac
+
+    return filter(filter_host, agents)
+
+
+def get_agents_ids(agents):
+    def agent_name(agent):
+        return agent['id']
+
+    return set(map(agent_name, agents))
 
 
 def get_host_data(ctx):
     cadvisor_url = ctx['cadvisor_host'] + "/api/v1.3/machine"
     return requests.get(cadvisor_url).json()
+
+
+def get_containers(ctx):
+    cadvisor_url = ctx['cadvisor_host'] + "/api/v1.3/docker"
+    resp = requests.get(cadvisor_url).json()
+    return resp.values()
 
 
 def get_container(ctx, container):
