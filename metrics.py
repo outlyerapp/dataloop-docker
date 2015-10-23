@@ -99,7 +99,7 @@ def publish_metrics(ctx, metrics):
 
 def main(argv):
     ctx = {
-        "metric_interval": 10,
+        "metric_interval": 30,
         "api_host": "https://www.dataloop.io",
         "cadvisor_host": "http://127.0.0.1:8080",
         "graphite_host": "graphite.dataloop.io",
