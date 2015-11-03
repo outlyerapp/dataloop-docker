@@ -9,15 +9,16 @@ logger = logging.getLogger(__name__)
 
 
 def tag(ctx):
-    logger.debug("tagging")
-    try:
-        containers = dl_lib.get_containers(ctx)
-        container_paths = dl_lib.get_container_paths(containers)
-        tag_containers(ctx, container_paths)
-    except Exception as ex:
-        logger.error("tagging failed: %s" % ex, exc_info=True)
-    finally:
-        time.sleep(ctx['tag_interval'])
+    while True:
+        logger.debug("tagging")
+        try:
+            containers = dl_lib.get_containers(ctx)
+            container_paths = dl_lib.get_container_paths(containers)
+            tag_containers(ctx, container_paths)
+        except Exception as ex:
+            logger.error("tagging failed: %s" % ex, exc_info=True)
+        finally:
+            time.sleep(ctx['tag_interval'])
 
 
 def tag_containers(ctx, container_paths):
