@@ -16,6 +16,8 @@ def tag(ctx):
         tag_containers(ctx, container_paths)
     except Exception as ex:
         logger.error("tagging failed: %s" % ex, exc_info=True)
+    finally:
+        time.sleep(ctx['tag_interval'])
 
 
 def tag_containers(ctx, container_paths):
