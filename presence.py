@@ -38,7 +38,7 @@ def ping_containers(ctx, container_paths):
             'container_name': '001',
             'ip': '',
             'interfaces': dl_lib.get_network(id),
-            'mode': 'solo',
+            'mode': 'SOLO',
             'name': id
         }
         finger = dl_lib.hash_id(path)
