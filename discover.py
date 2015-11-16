@@ -28,7 +28,7 @@ def register_sync(ctx):
     container_hashes = get_container_hashes(containers)
     logger.debug("containers: %s", container_hashes)
 
-    dead_containers = agent_ids - container_hashes
+    dead_containers = agent_ids - container_hashes - set([dl_lib.hash_id(dl_lib.get_host_mac(ctx))])
 
     destroy_agents(ctx, dead_containers)
 

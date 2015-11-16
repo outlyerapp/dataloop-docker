@@ -72,6 +72,7 @@ def get_container_paths(containers):
 
     return set(map(get_path, containers))
 
+
 def get_container_env_vars(container):
     env_tags = {}
     for env_var in docker_cli.inspect_container(container)['Config']['Env']:

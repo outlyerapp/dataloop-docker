@@ -17,6 +17,7 @@ def send_metrics(ctx):
     except Exception as ex:
         logger.error("metrics failed: %s" % ex, exc_info=True)
 
+
 def get_metrics(ctx, containers):
     metrics = {}
     host_data = dl_lib.get_host_data(ctx)
