@@ -34,6 +34,7 @@ def get_container_metrics(ctx, container, host):
     last = stats[-1]
 
     metrics = {
+        finger + '.base.count': 1,
         finger + '.base.load_1_min': last['cpu']['load_average'],
         finger + '.base.cpu': cpu_percent(stats, host),
         finger + '.base.memory': memory_percent(stats, host),
