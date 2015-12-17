@@ -94,7 +94,7 @@ def get_host_mac(ctx):
 def get_processes(container):
     process_list = []
     processes = docker_cli.top(container)['Processes']
-    for process in processes:
+    for process in processes or []:
         process_list.append(process[len(process) -1] + ':1')
     return process_list
 
