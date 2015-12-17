@@ -85,7 +85,7 @@ def network_tx_kps(stats):
 def network_rx_kps(stats):
     n_prev_stats = min(10, len(stats))
     network_rx_now = stats[-1]['network']['rx_bytes']
-    network_rx_prev = stats[-10]['network']['rx_bytes']
+    network_rx_prev = stats[-n_prev_stats]['network']['rx_bytes']
     return ((network_rx_now - network_rx_prev) / 1024) / n_prev_stats
 
 
