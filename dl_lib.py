@@ -62,8 +62,12 @@ def get_containers(ctx):
 
 
 def get_container(ctx, container):
-    cadvisor_url = "%s/api/v1.3/%s" % (ctx['cadvisor_host'], container,)
-    return requests.get(cadvisor_url).json()[container]
+    if container.startswith('/docker/'):
+        cadvisor_url = "%s/api/v1.3/%s" % (ctx['cadvisor_host'], container,)
+        return requests.get(cadvisor_url).json()[container]
+
+    cadvisor_url = "%s/api/v1.3/containers/%s" % (ctx['cadvisor_host'], container,)
+    return requests.get(cadvisor_url).json()
 
 
 def get_container_paths(containers):
@@ -80,7 +84,9 @@ def get_container_env_vars(container):
 
 
 def get_container_id(path):
-    if 'system.slice' in path:
+    if 'system.slice/docker-' in path:
+        return path.replace('/system.slice/docker-', '')[:12]
+    elif 'system.slice/docker.service/docker/' in path:
         return path.replace('/system.slice/docker-', '')[:12]
     else:
         return path.replace('/docker/', '')[:12]
