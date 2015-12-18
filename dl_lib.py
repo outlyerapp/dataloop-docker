@@ -87,7 +87,7 @@ def get_container_id(path):
     if 'system.slice/docker-' in path:
         return path.replace('/system.slice/docker-', '')[:12]
     elif 'system.slice/docker.service/docker/' in path:
-        return path.replace('/system.slice/docker-', '')[:12]
+        return path.replace('/system.slice/docker.service/docker/', '')[:12]
     else:
         return path.replace('/docker/', '')[:12]
 
