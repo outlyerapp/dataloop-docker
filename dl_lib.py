@@ -146,8 +146,8 @@ def flatten(structure, key="", path="", flattened=None):
 
 
 def slugify(value):
-    _slugify_strip_re = re.compile(r'[^\w\s-]')
-    _slugify_hyphenate_re = re.compile(r'[-\s]+')
+    _slugify_strip_re = re.compile(r'[^\w\/\\:]')
+    _slugify_hyphenate_re = re.compile(r'[-\s\\\/]+')
     if not isinstance(value, unicode):
         value = unicode(value)
     value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore')
