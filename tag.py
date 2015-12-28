@@ -58,7 +58,7 @@ def container_aliases(container):
 
 
 def container_image(container):
-    return [container['spec']['image']]
+    return [dl_lib.slugify(container['spec']['image'])]
 
 
 def contain_env_vars(container):
@@ -71,6 +71,7 @@ def contain_env_vars(container):
             env_var_tags += [env_vars[var]]
 
     return env_var_tags
+
 
 def container_host_name():
     with open('/rootfs/etc/hostname', 'r') as f:
