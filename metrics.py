@@ -17,6 +17,7 @@ def send_metrics(ctx):
     except Exception as ex:
         logger.error("metrics failed: %s" % ex, exc_info=True)
 
+
 def get_metrics(ctx, containers):
     metrics = {}
     host_data = dl_lib.get_host_data(ctx)
@@ -53,14 +54,14 @@ def get_container_metrics(ctx, container, host):
 
 def cpu_percent(stats, host):
     cores = host['num_cores']
-
+    n_prev_stats = min(10, len(stats))
     # 60 samples in a list at 1 second interval. 59 being most recent.
     cpu_total_now = stats[-1]['cpu']['usage']['total']
-    cpu_total_prev = stats[- 10]['cpu']['usage']['total']
+    cpu_total_prev = stats[-n_prev_stats]['cpu']['usage']['total']
 
     # calculate the cpu difference over 10 seconds then calculate rate
     cpu_total_delta = cpu_total_now - cpu_total_prev
-    cpu_total_rate = cpu_total_delta / 10
+    cpu_total_rate = cpu_total_delta / n_prev_stats
 
     # total amount of cpu is number of billionths of a core
     total_compute_available = cores * 1000000000
@@ -76,15 +77,17 @@ def memory_percent(stats, host):
 
 
 def network_tx_kps(stats):
+    n_prev_stats = min(10, len(stats))
     network_tx_now = stats[-1]['network']['tx_bytes']
-    network_tx_prev = stats[-10]['network']['tx_bytes']
-    return ((network_tx_now - network_tx_prev) / 1024) / 10
+    network_tx_prev = stats[-n_prev_stats]['network']['tx_bytes']
+    return ((network_tx_now - network_tx_prev) / 1024) / n_prev_stats
 
 
 def network_rx_kps(stats):
+    n_prev_stats = min(10, len(stats))
     network_rx_now = stats[-1]['network']['rx_bytes']
-    network_rx_prev = stats[-10]['network']['rx_bytes']
-    return ((network_rx_now - network_rx_prev) / 1024) / 10
+    network_rx_prev = stats[-n_prev_stats]['network']['rx_bytes']
+    return ((network_rx_now - network_rx_prev) / 1024) / n_prev_stats
 
 
 def publish_metrics(ctx, metrics):
