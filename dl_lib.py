@@ -35,7 +35,7 @@ def hash_id(id):
 def container_real_host_name():
     with open('/rootfs/etc/hostname', 'r') as f:
         hostname = f.read()
-    return [hostname.strip()]
+    return hostname.strip()
 
 
 def get_agents(ctx):

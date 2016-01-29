@@ -29,7 +29,7 @@ def ping_containers(ctx, container_paths):
         id = dl_lib.get_container_id(path)
         details = {
             'mac': host_mac,
-            'hostname': "{} ({})".format(dl_lib.container_real_host_name()[0], host_name),
+            'hostname': "{} ({})".format(dl_lib.container_real_host_name(), host_name),
             'tags': '',
             'os_name': 'docker',
             'os_version': '',

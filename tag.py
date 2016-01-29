@@ -4,7 +4,6 @@ import sys
 import getopt
 import time
 import dl_lib
-from dl_lib import container_real_host_name as container_host_name
 
 logger = logging.getLogger(__name__)
 
@@ -72,6 +71,10 @@ def contain_env_vars(container):
             env_var_tags += [env_vars[var]]
 
     return env_var_tags
+
+
+def container_host_name():
+    return [dl_lib.container_real_host_name()]
 
 
 def main(argv):
