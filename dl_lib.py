@@ -32,6 +32,12 @@ def hash_id(id):
     return str(uuid.uuid5(UUID_HASH, id))
 
 
+def container_real_host_name():
+    with open('/rootfs/etc/hostname', 'r') as f:
+        hostname = f.read()
+    return [hostname.strip()]
+
+
 def get_agents(ctx):
     host_mac = get_host_mac(ctx)
     agent_api = "%s/api/agents?mac=%s" % (ctx['api_host'], host_mac)
@@ -77,6 +83,10 @@ def get_container_paths(containers):
         return c['name']
 
     return set(map(get_path, containers))
+
+
+def get_container_name(container):
+    return docker_cli.inspect_container(container)['Name'][1:]
 
 
 def get_container_env_vars(container):
