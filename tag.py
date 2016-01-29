@@ -45,6 +45,7 @@ def get_tags(ctx, container_path):
     tags += container_aliases(container)
     tags += container_image(container)
     tags += contain_env_vars(container)
+    tags += container_host_name()
 
     return tags
 
@@ -57,7 +58,7 @@ def container_aliases(container):
 
 
 def container_image(container):
-    return [container['spec']['image']]
+    return [dl_lib.slugify(container['spec']['image'])]
 
 
 def contain_env_vars(container):
@@ -70,6 +71,12 @@ def contain_env_vars(container):
             env_var_tags += [env_vars[var]]
 
     return env_var_tags
+
+
+def container_host_name():
+    with open('/rootfs/etc/hostname', 'r') as f:
+        hostname = f.read()
+    return [hostname.strip()]
 
 
 def main(argv):

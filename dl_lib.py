@@ -5,13 +5,15 @@ from docker.client import Client
 from docker.utils import kwargs_from_env
 import sys
 import requests
+import re
+import unicodedata
 
 UUID_HASH = uuid.UUID('12345678123456781234567812345678')
 logger = logging.getLogger(__name__)
 logging.basicConfig(format="%(asctime)s %(levelname)s %(name)s - %(message)s",
                     datefmt="%Y-%m-%d %H:%M:%S",
                     stream=sys.stdout,
-                    level=logging.INFO)
+                    level=logging.WARNING)
 
 if os.path.exists('/rootfs/var/run/docker.sock'):
     docker_cli = Client(base_url='unix://rootfs/var/run/docker.sock', version='auto')
@@ -75,6 +77,7 @@ def get_container_paths(containers):
         return c['name']
 
     return set(map(get_path, containers))
+
 
 def get_container_env_vars(container):
     env_tags = {}
@@ -146,3 +149,13 @@ def flatten(structure, key="", path="", flattened=None):
         for new_key, value in structure.items():
             flatten(value, new_key, path + "." + key, flattened)
     return flattened
+
+
+def slugify(value):
+    _slugify_strip_re = re.compile(r'[^\w\/\\:]')
+    _slugify_hyphenate_re = re.compile(r'[-\s\\\/]+')
+    if not isinstance(value, unicode):
+        value = unicode(value)
+    value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore')
+    value = unicode(_slugify_strip_re.sub('', value).strip().lower())
+    return _slugify_hyphenate_re.sub('-', value)
