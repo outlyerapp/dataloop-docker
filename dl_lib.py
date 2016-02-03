@@ -32,6 +32,12 @@ def hash_id(id):
     return str(uuid.uuid5(UUID_HASH, id))
 
 
+def container_real_host_name():
+    with open('/rootfs/etc/hostname', 'r') as f:
+        hostname = f.read()
+    return hostname.strip()
+
+
 def get_agents(ctx):
     host_mac = get_host_mac(ctx)
     agent_api = "%s/api/agents?mac=%s" % (ctx['api_host'], host_mac)
@@ -59,8 +65,16 @@ def get_host_data(ctx):
 
 def get_containers(ctx):
     cadvisor_url = ctx['cadvisor_host'] + "/api/v1.3/docker"
-    resp = requests.get(cadvisor_url).json()
-    return resp.values()
+    resp = requests.get(cadvisor_url)
+    if resp.status_code == 500:
+        ## cadvisor have to die
+        import psutil, time
+        for proc in psutil.process_iter():
+            if proc.name() == 'cadvisor':
+                proc.kill()
+                time.sleep(3)
+                return get_containers(ctx)
+    return resp.json().values()
 
 
 def get_container(ctx, container):
@@ -77,6 +91,10 @@ def get_container_paths(containers):
         return c['name']
 
     return set(map(get_path, containers))
+
+
+def get_container_name(container):
+    return docker_cli.inspect_container(container)['Name'][1:]
 
 
 def get_container_env_vars(container):

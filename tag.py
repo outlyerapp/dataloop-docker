@@ -74,9 +74,7 @@ def contain_env_vars(container):
 
 
 def container_host_name():
-    with open('/rootfs/etc/hostname', 'r') as f:
-        hostname = f.read()
-    return [hostname.strip()]
+    return [dl_lib.container_real_host_name()]
 
 
 def main(argv):
