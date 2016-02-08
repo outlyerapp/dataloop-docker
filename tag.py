@@ -28,10 +28,10 @@ def tag_containers(ctx, container_paths):
 
     def create_request(path):
         tags = get_tags(ctx, path)
-        data = {'names': ','.join(tags)}
+        data = {'tags': ','.join(tags)}
 
         finger = dl_lib.hash_id(path)
-        url = "%s/api/agents/%s/tags" % (api_host, finger,)
+        url = "%s/agents/%s/tags" % (api_host, finger,)
         return grequests.put(url, json=data, headers=headers)
 
     reqs = map(create_request, container_paths)
@@ -82,7 +82,7 @@ def container_host_name():
 def main(argv):
     ctx = {
         "tag_interval": 10,
-        "api_host": "https://www.dataloop.io",
+        "api_host": "https://agent.dataloop.io",
         "cadvisor_host": "http://127.0.0.1:8080"
     }
 
