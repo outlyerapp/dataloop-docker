@@ -1,5 +1,5 @@
 #!/bin/sh
-[ -z "$API_URL" ] && API_URL="https://www.dataloop.io"
+[ -z "$API_URL" ] && API_URL="https://agent.dataloop.io"
 exec /opt/dataloop/embedded/bin/python \
      /opt/dataloop/embedded/bin/tag.py -a $API_KEY -u $API_URL \
      >>/var/log/dataloop/tag.log 2>&1
