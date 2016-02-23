@@ -17,6 +17,16 @@ dataloop/dataloop-docker:latest
 
 [![](https://badge.imagelayers.io/dataloop/dataloop-docker:latest.svg)](https://imagelayers.io/?images=dataloop/dataloop-docker:latest 'Get your own badge on imagelayers.io')
 
+Proxy
+=====
+
+If you are behind a proxy server, you can pass the standard proxy environment variables to the docker container to have data passed through:
+
+```
+docker run -e HTTP_PROXY=http://proxy:port....
+```
+
+
 Contributing Changes
 ====================
 
