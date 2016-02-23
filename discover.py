@@ -4,9 +4,11 @@ import sys
 import time
 import grequests
 import dl_lib
+import os
 
 logger = logging.getLogger(__name__)
 
+os.environ['NO_PROXY'] = '127.0.0.1'
 
 def registration(ctx):
     while True:
