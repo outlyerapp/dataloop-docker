@@ -4,9 +4,11 @@ import sys
 import getopt
 import time
 import dl_lib
+import os
 
 logger = logging.getLogger(__name__)
 
+os.environ['NO_PROXY'] = '127.0.0.1'
 
 def tag(ctx):
     while True:

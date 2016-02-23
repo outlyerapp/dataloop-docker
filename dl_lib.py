@@ -8,6 +8,8 @@ import requests
 import re
 import unicodedata
 
+os.environ['NO_PROXY'] = '127.0.0.1'
+
 UUID_HASH = uuid.UUID('12345678123456781234567812345678')
 logger = logging.getLogger(__name__)
 logging.basicConfig(format="%(asctime)s %(levelname)s %(name)s - %(message)s",
