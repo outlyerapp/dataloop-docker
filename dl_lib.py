@@ -8,6 +8,8 @@ import requests
 import re
 import unicodedata
 
+os.environ['NO_PROXY'] = '127.0.0.1'
+
 UUID_HASH = uuid.UUID('12345678123456781234567812345678')
 logger = logging.getLogger(__name__)
 logging.basicConfig(format="%(asctime)s %(levelname)s %(name)s - %(message)s",
@@ -40,7 +42,7 @@ def container_real_host_name():
 
 def get_agents(ctx):
     host_mac = get_host_mac(ctx)
-    agent_api = "%s/api/agents?mac=%s" % (ctx['api_host'], host_mac)
+    agent_api = "%s/agents?mac=%s" % (ctx['api_host'], host_mac)
     resp = requests.get(agent_api, headers=get_request_headers(ctx))
     resp.raise_for_status()
     agents = resp.json()

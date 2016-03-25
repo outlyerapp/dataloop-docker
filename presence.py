@@ -5,9 +5,11 @@ import sys
 import time
 import grequests
 import dl_lib
+import os
 
 logger = logging.getLogger(__name__)
 
+os.environ['NO_PROXY'] = '127.0.0.1'
 
 def ping(ctx):
     logger.debug("pinging")
@@ -30,19 +32,16 @@ def ping_containers(ctx, container_paths):
         details = {
             'mac': host_mac,
             'hostname': "{} ({})".format(dl_lib.container_real_host_name(), host_name),
-            'tags': '',
             'os_name': 'docker',
             'os_version': '',
-            'container_name': '',
-            'proc_list': dl_lib.get_processes(id),
-            'container_name': '001',
-            'ip': '',
+            'processes': dl_lib.get_processes(id),
+            'container': '001',
             'interfaces': dl_lib.get_network(id),
             'mode': 'SOLO',
             'name': "{} ({})".format(dl_lib.get_container_name(id), id)
         }
         finger = dl_lib.hash_id(path)
-        url = "%s/api/agents/%s/ping" % (api_host, finger,)
+        url = "%s/agents/%s/ping" % (api_host, finger,)
         return grequests.post(url, json=details, headers=headers)
 
     reqs = map(create_request, container_paths)
@@ -52,7 +51,7 @@ def ping_containers(ctx, container_paths):
 def main(argv):
     ctx = {
         "ping_interval": 10,
-        "api_host": "https://www.dataloop.io",
+        "api_host": "https://agent.dataloop.io",
         "cadvisor_host": "http://127.0.0.1:8080"
     }
 

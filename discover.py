@@ -4,9 +4,11 @@ import sys
 import time
 import grequests
 import dl_lib
+import os
 
 logger = logging.getLogger(__name__)
 
+os.environ['NO_PROXY'] = '127.0.0.1'
 
 def registration(ctx):
     while True:
@@ -42,7 +44,7 @@ def destroy_agents(ctx, agent_ids):
     headers = dl_lib.get_request_headers(ctx)
 
     def create_request(id):
-        url = "%s/api/agents/%s/deregister" % (api_host, id,)
+        url = "%s/agents/%s/deregister" % (api_host, id,)
         return grequests.post(url, headers=headers)
 
     reqs = map(create_request, agent_ids)
@@ -52,7 +54,7 @@ def destroy_agents(ctx, agent_ids):
 def main(argv):
     ctx = {
         "register_interval": 30,
-        "api_host": "https://www.dataloop.io",
+        "api_host": "https://agent.dataloop.io",
         "cadvisor_host": "http://127.0.0.1:8080"
     }
 
