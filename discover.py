@@ -13,11 +13,15 @@ os.environ['NO_PROXY'] = '127.0.0.1'
 
 def registration(ctx):
     while True:
-        register_sync(ctx)
+        try:
+            register_sync(ctx)
+        except Exception as ex:
+            logger.error("register sync failed: %s" % ex, exc_info=True)
+        finally:
+            time.sleep(ctx['register_interval'])
 
 
 def register_sync(ctx):
-    try:
         logger.info("register sync")
         agents = dl_lib.get_agents(ctx)
         agent_ids = dl_lib.get_agents_ids(agents)
@@ -26,10 +30,6 @@ def register_sync(ctx):
         logger.debug("containers: %s", container_hashes)
         dead_containers = agent_ids - container_hashes
         destroy_agents(ctx, dead_containers)
-    except Exception as ex:
-        logger.error("register sync failed: %s" % ex, exc_info=True)
-    finally:
-        time.sleep(ctx['register_interval'])
 
 
 def get_container_hashes(containers):
