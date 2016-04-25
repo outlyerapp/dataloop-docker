@@ -10,29 +10,26 @@ logger = logging.getLogger(__name__)
 
 os.environ['NO_PROXY'] = '127.0.0.1'
 
+
 def registration(ctx):
     while True:
-        try:
-            register_sync(ctx)
-        except Exception as ex:
-            logger.error("register sync failed: %s" % ex, exc_info=True)
-        finally:
-            time.sleep(ctx['register_interval'])
+        register_sync(ctx)
 
 
 def register_sync(ctx):
-    logger.info("register sync")
-
-    agents = dl_lib.get_agents(ctx)
-    agent_ids = dl_lib.get_agents_ids(agents)
-
-    containers = dl_lib.get_containers(ctx)
-    container_hashes = get_container_hashes(containers)
-    logger.debug("containers: %s", container_hashes)
-
-    dead_containers = agent_ids - container_hashes
-
-    destroy_agents(ctx, dead_containers)
+    try:
+        logger.info("register sync")
+        agents = dl_lib.get_agents(ctx)
+        agent_ids = dl_lib.get_agents_ids(agents)
+        containers = dl_lib.get_containers(ctx)
+        container_hashes = get_container_hashes(containers)
+        logger.debug("containers: %s", container_hashes)
+        dead_containers = agent_ids - container_hashes
+        destroy_agents(ctx, dead_containers)
+    except Exception as ex:
+        logger.error("register sync failed: %s" % ex, exc_info=True)
+    finally:
+        time.sleep(ctx['register_interval'])
 
 
 def get_container_hashes(containers):
