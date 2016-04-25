@@ -12,13 +12,12 @@ os.environ['NO_PROXY'] = '127.0.0.1'
 
 
 def registration(ctx):
-    while True:
-        try:
-            register_sync(ctx)
-        except Exception as ex:
-            logger.error("register sync failed: %s" % ex, exc_info=True)
-        finally:
-            time.sleep(ctx['register_interval'])
+    try:
+        register_sync(ctx)
+    except Exception as ex:
+        logger.error("register sync failed: %s" % ex, exc_info=True)
+    finally:
+        time.sleep(ctx['register_interval'])
 
 
 def register_sync(ctx):
@@ -70,7 +69,6 @@ def main(argv):
             ctx['cadvisor_host'] = arg
         elif opt in ("-u", "--apiurl"):
             ctx['api_host'] = arg
-
 
     while True:
         registration(ctx)
