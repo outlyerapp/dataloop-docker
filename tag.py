@@ -10,17 +10,17 @@ logger = logging.getLogger(__name__)
 
 os.environ['NO_PROXY'] = '127.0.0.1'
 
+
 def tag(ctx):
-    while True:
-        logger.debug("tagging")
-        try:
-            containers = dl_lib.get_containers(ctx)
-            container_paths = dl_lib.get_container_paths(containers)
-            tag_containers(ctx, container_paths)
-        except Exception as ex:
-            logger.error("tagging failed: %s" % ex, exc_info=True)
-        finally:
-            time.sleep(ctx['tag_interval'])
+    logger.debug("tagging")
+    try:
+        containers = dl_lib.get_containers(ctx)
+        container_paths = dl_lib.get_container_paths(containers)
+        tag_containers(ctx, container_paths)
+    except Exception as ex:
+        logger.error("tagging failed: %s" % ex, exc_info=True)
+    finally:
+        time.sleep(ctx['tag_interval'])
 
 
 def tag_containers(ctx, container_paths):
@@ -35,7 +35,7 @@ def tag_containers(ctx, container_paths):
         finger = dl_lib.hash_id(path)
         url = "%s/agents/%s/tags" % (api_host, finger,)
         return grequests.put(url, json=data, headers=headers)
-
+    
     reqs = map(create_request, container_paths)
     grequests.map(reqs)
 
@@ -64,14 +64,13 @@ def container_image(container):
 
 
 def contain_env_vars(container):
-    id = dl_lib.get_container_id(container['name'])
-    env_vars = dl_lib.get_container_env_vars(id)
+    container_id = dl_lib.get_container_id(container['name'])
+    env_vars = dl_lib.get_container_env_vars(container_id)
     env_vars_to_tag = ['ENV', 'APP_NAME']
     env_var_tags = []
     for var in env_vars_to_tag:
         if var in env_vars:
             env_var_tags += [env_vars[var]]
-
     return env_var_tags
 
 
@@ -103,7 +102,6 @@ def main(argv):
             ctx['cadvisor_host'] = arg
         elif opt in ("-u", "--apiurl"):
             ctx['api_host'] = arg
-
 
     while True:
         tag(ctx)

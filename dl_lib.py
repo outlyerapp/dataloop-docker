@@ -83,8 +83,9 @@ def get_container_paths(containers):
 
 def get_container_env_vars(container):
     env_tags = {}
-    for env_var in docker_cli.inspect_container(container)['Config']['Env']:
-        env_tags[env_var.split('=')[0]] = env_var.split('=')[1]
+    if docker_cli.inspect_container(container)['Config']['Env'] is not None:
+        for env_var in docker_cli.inspect_container(container)['Config']['Env']:
+            env_tags[env_var.split('=')[0]] = env_var.split('=')[1]
     return env_tags
 
 
