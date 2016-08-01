@@ -37,9 +37,13 @@ def hash_id(id):
 def get_agents(ctx):
     host_mac = get_host_mac(ctx)
     agent_api = "%s/agents?mac=%s" % (ctx['api_host'], host_mac)
-    resp = requests.get(agent_api, headers=get_request_headers(ctx))
-    resp.raise_for_status()
-    agents = resp.json()
+    try:
+        resp = requests.get(agent_api, headers=get_request_headers(ctx), timeout=5)
+        resp.raise_for_status()
+        agents = resp.json()
+    except:
+        agents = ''
+        logger.info("Failed to return agents by mac")
 
     def filter_host(agent):
         return agent['mac'] == host_mac
