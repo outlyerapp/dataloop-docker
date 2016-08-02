@@ -20,6 +20,9 @@ def ping(ctx):
     except Exception as ex:
         logger.error("ping failed: %s" % ex, exc_info=True)
 
+def exception_handler(request, exception):
+    logger.info(request.url, "| request failed")
+
 
 def ping_containers(ctx, container_paths):
     api_host = ctx['api_host']
@@ -45,7 +48,7 @@ def ping_containers(ctx, container_paths):
         return grequests.post(url, json=details, headers=headers)
 
     reqs = map(create_request, container_paths)
-    grequests.map(reqs)
+    grequests.map(reqs, exception_handler=exception_handler)
 
 
 def main(argv):
