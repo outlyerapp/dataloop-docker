@@ -45,7 +45,7 @@ def ping_containers(ctx, container_paths):
         }
         finger = dl_lib.hash_id(path)
         url = "%s/agents/%s/ping" % (api_host, finger,)
-        return grequests.post(url, json=details, headers=headers)
+        return grequests.post(url, json=details, headers=headers, timeout=2)
 
     reqs = map(create_request, container_paths)
     grequests.map(reqs, exception_handler=exception_handler)
