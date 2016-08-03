@@ -34,14 +34,14 @@ def ping_containers(ctx, container_paths):
         id = dl_lib.get_container_id(path)
         details = {
             'mac': host_mac,
-            'hostname': host_name,
+            'hostname': "{} ({})".format(dl_lib.container_real_host_name(), host_name),
             'os_name': 'docker',
             'os_version': '',
             'processes': dl_lib.get_processes(id),
             'container': '001',
             'interfaces': dl_lib.get_network(id),
             'mode': 'SOLO',
-            'name': id
+            'name': "{} ({})".format(dl_lib.get_container_name(id), id)
         }
         finger = dl_lib.hash_id(path)
         url = "%s/agents/%s/ping" % (api_host, finger,)
