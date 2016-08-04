@@ -41,7 +41,7 @@ def ping_containers(ctx, container_paths):
             'container': '001',
             'interfaces': dl_lib.get_network(id),
             'mode': 'SOLO',
-            'name': id
+            'name': dl_lib.get_container_name(id)
         }
         finger = dl_lib.hash_id(path)
         url = "%s/agents/%s/ping" % (api_host, finger,)

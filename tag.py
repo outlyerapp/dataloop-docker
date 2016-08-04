@@ -35,7 +35,7 @@ def tag_containers(ctx, container_paths):
         finger = dl_lib.hash_id(path)
         url = "%s/agents/%s/tags" % (api_host, finger,)
         return grequests.put(url, json=data, headers=headers)
-    
+
     reqs = map(create_request, container_paths)
     grequests.map(reqs)
 
@@ -75,9 +75,7 @@ def contain_env_vars(container):
 
 
 def container_host_name():
-    with open('/rootfs/etc/hostname', 'r') as f:
-        hostname = f.read()
-    return [hostname.strip()]
+    return [dl_lib.container_real_host_name()]
 
 
 def main(argv):
