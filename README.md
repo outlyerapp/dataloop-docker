@@ -1,7 +1,7 @@
 Dataloop Docker Autodiscovery Container
 =======================================
 
-Run this container on each of your Docker hosts. It will automatically create an agent instance inside Dataloop for each container on your host with basic operating system metrics under it.
+Run this container on each of your Docker hosts alongside a Dataloo linux agent. It will automatically create an agent instance inside Dataloop for each container on your host with basic operating system metrics under it.
 
 To run this container:
 ```
@@ -14,8 +14,6 @@ sudo docker run -d -e API_KEY=${API_KEY} \
 --volume=/var/lib/docker/:/var/lib/docker:ro \
 dataloop/dataloop-docker:latest
 ```
-
-[![](https://badge.imagelayers.io/dataloop/dataloop-docker:latest.svg)](https://imagelayers.io/?images=dataloop/dataloop-docker:latest 'Get your own badge on imagelayers.io')
 
 Proxy
 =====
