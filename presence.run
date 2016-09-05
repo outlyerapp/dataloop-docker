@@ -1,7 +1,6 @@
 #!/bin/sh
 [ -z "$API_URL" ] && API_URL="https://agent.dataloop.io"
-echo "Starting container presence service" >> /var/log/dataloop/presence.log
+echo "Started container presence service" >> /var/log/dataloop/presence.log
 exec /opt/dataloop/embedded/bin/python \
      /opt/dataloop/embedded/bin/presence.py -a $API_KEY -u $API_URL \
      >>/var/log/dataloop/presence.log 2>&1
-echo "Presence service started" >> /var/log/dataloop/presence.log

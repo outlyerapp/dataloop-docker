@@ -2,8 +2,7 @@
 [ -z "$API_URL" ] && API_URL="https://agent.dataloop.io"
 [ -z "$GRAPHITE_SERVER" ] && GRAPHITE_SERVER="graphite.dataloop.io"
 [ -z "$GRAPHITE_PORT" ] && GRAPHITE_PORT=2003
-echo "Starting container metrics service" >> /var/log/dataloop/metrics.log
+echo "Started container metrics service" >> /var/log/dataloop/metrics.log
 exec /opt/dataloop/embedded/bin/python \
      /opt/dataloop/embedded/bin/metrics.py -a $API_KEY -u $API_URL -s $GRAPHITE_SERVER -p $GRAPHITE_PORT \
      >>/var/log/dataloop/metrics.log 2>&1
-echo "Metrics service started" >> /var/log/dataloop/metrics.log

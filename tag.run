@@ -1,8 +1,6 @@
 #!/bin/sh
 [ -z "$API_URL" ] && API_URL="https://agent.dataloop.io"
-echo "Starting container tag service" >> /var/log/dataloop/tag.log
+echo "Started container tag service" >> /var/log/dataloop/tag.log
 exec /opt/dataloop/embedded/bin/python \
      /opt/dataloop/embedded/bin/tag.py -a $API_KEY -u $API_URL \
      >>/var/log/dataloop/tag.log 2>&1
-echo "Tag service started" >> /var/log/dataloop/tag.log
-
