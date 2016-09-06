@@ -15,6 +15,12 @@ sudo docker run -d -e API_KEY=${API_KEY} \
 dataloop/dataloop-docker:latest
 ```
 
+If using an Amazon Linux AMI you will need to also mount the /cgroup directory into the container.
+
+```
+-v /cgroup:/sys/fs/cgroup:ro
+```
+
 Proxy
 =====
 
