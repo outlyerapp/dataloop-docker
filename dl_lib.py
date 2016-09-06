@@ -103,6 +103,13 @@ def get_container_env_vars(container):
     return env_tags
 
 
+def get_container_labels(container):
+    label_tags = {}
+    if docker_cli.inspect_container(container)['Config']['Labels'] is not None:
+        label_tags = docker_cli.inspect_container(container)['Config']['Labels']
+    return label_tags
+
+
 def get_container_id(path):
     if 'system.slice/docker-' in path:
         return path.replace('/system.slice/docker-', '')[:12]
