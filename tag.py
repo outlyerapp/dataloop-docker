@@ -46,7 +46,7 @@ def get_tags(ctx, container_path):
     tags = ["all", "docker"]
     tags += container_aliases(container)
     tags += container_image(container)
-    tags += contain_env_vars(container)
+    # tags += contain_env_vars(container)
     tags += container_host_name()
 
     return tags
