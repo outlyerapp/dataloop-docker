@@ -3,4 +3,4 @@
 echo "Started container discover service" >> /var/log/dataloop/discover.log
 exec /opt/dataloop/embedded/bin/python \
      /opt/dataloop/embedded/bin/discover.py -a $API_KEY -u $API_URL \
-     >>/var/log/dataloop/discover.log 2>&1
+     >> /dev/stdout 2>&1

@@ -5,4 +5,4 @@
 echo "Started container metrics service" >> /var/log/dataloop/metrics.log
 exec /opt/dataloop/embedded/bin/python \
      /opt/dataloop/embedded/bin/metrics.py -a $API_KEY -u $API_URL -s $GRAPHITE_SERVER -p $GRAPHITE_PORT \
-     >>/var/log/dataloop/metrics.log 2>&1
+     >> /dev/stdout 2>&1

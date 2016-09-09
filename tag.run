@@ -3,4 +3,4 @@
 echo "Started container tag service" >> /var/log/dataloop/tag.log
 exec /opt/dataloop/embedded/bin/python \
      /opt/dataloop/embedded/bin/tag.py -a $API_KEY -u $API_URL \
-     >>/var/log/dataloop/tag.log 2>&1
+     >> /dev/stdout 2>&1

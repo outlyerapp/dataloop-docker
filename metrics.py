@@ -5,7 +5,7 @@ import getopt
 import time
 import dl_lib
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('METRICS')
 
 
 def send_metrics(ctx):
