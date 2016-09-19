@@ -89,8 +89,11 @@ def container_labels(container):
 
 
 def container_host_name():
-    return [dl_lib.container_real_host_name()]
-
+    try:
+        return [dl_lib.container_real_host_name()]
+    except Exception as E:
+        logger.error("failed to get container hostname: %s" % E)
+        return []
 
 def main(argv):
     ctx = {
