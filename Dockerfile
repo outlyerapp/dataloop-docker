@@ -15,7 +15,7 @@ RUN curl -s https://download.dataloop.io/pubkey.gpg | apt-key add - \
 
 
 # TODO: Install cadvisor - link to for now
-ADD https://github.com/google/cadvisor/releases/download/v0.24.0-alpha1/cadvisor /opt/dataloop/embedded/bin/cadvisor
+ADD https://github.com/google/cadvisor/releases/download/v0.24.0/cadvisor /opt/dataloop/embedded/bin/cadvisor
 RUN chmod +x /opt/dataloop/embedded/bin/cadvisor
 RUN mkdir /etc/service/cadvisor
 ADD cadvisor.run /etc/service/cadvisor/run
