@@ -21,6 +21,9 @@ If using an Amazon Linux AMI you will need to also mount the /cgroup directory i
 -v /cgroup:/sys/fs/cgroup:ro
 ```
 
+RHEL and CentOS lock down their containers a bit more. cAdvisor needs access to the Docker daemon through its socket. This requires --privileged=true in RHEL and CentOS.
+
+
 Proxy
 =====
 
