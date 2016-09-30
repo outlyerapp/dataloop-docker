@@ -37,6 +37,7 @@ def get_container_metrics(ctx, container, host):
     metrics = {
         finger + '.base.count': 1,
         finger + '.base.load_1_min': last['cpu']['load_average'],
+        finger + '.base.load_fractional': load_fractional(stats, host),
         finger + '.base.cpu': cpu_percent(stats, host),
         finger + '.base.memory': memory_percent(stats, host),
         finger + '.base.swap': 0,
@@ -68,6 +69,10 @@ def cpu_percent(stats, host):
 
     # now you can work out percentage cpu used per second
     return (float(cpu_total_rate) / float(total_compute_available)) * 100
+
+
+def load_fractional(stats, host):
+    return float(stats[-1]['cpu']['load_average']) / float(host['num_cores'])
 
 
 def memory_percent(stats, host):
