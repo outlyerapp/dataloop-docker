@@ -2,5 +2,5 @@
 [ -z "$WSS_URL" ] && WSS_URL="wss://agent.dataloop.io"
 echo "Started container agent service" >> /var/log/dataloop/agent.log
 exec /opt/dataloop/embedded/bin/python \
-     /opt/dataloop/agent/agent.py -a $API_KEY --server $WSS_URL \
+     /opt/dataloop/agent/agent.py -a $API_KEY --server $WSS_URL --name $(cat /rootfs/etc/hostname) \
      >>/var/log/dataloop/agent.log 2>&1
