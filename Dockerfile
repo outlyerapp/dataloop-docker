@@ -20,6 +20,10 @@ RUN chmod +x /opt/dataloop/embedded/bin/cadvisor
 RUN mkdir /etc/service/cadvisor
 ADD cadvisor.run /etc/service/cadvisor/run
 
+# Dataloop Agent
+RUN mkdir /etc/service/agent
+ADD agent.run /etc/service/agent/run
+
 # Scripts!
 COPY discover.py /opt/dataloop/embedded/bin/discover.py
 COPY presence.py /opt/dataloop/embedded/bin/presence.py
