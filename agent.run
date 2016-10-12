@@ -1,8 +1,6 @@
 #!/bin/sh
-[ -z "$WSS_URL" ] && WSS_URL="wss://agent.dataloop.io"
 echo "Started container agent service" >> /var/log/dataloop/agent.log
 
-# consistently hash the fingerprint against the full container name
 container_name=$(grep cpu: /proc/self/cgroup | cut -d ':' -f3)
 echo "container name is $container_name" >> /var/log/dataloop/agent.log
 fingerprint=$(echo $container_name | /opt/dataloop/embedded/bin/python -c "import sys, uuid; print str(uuid.uuid5(uuid.UUID('12345678123456781234567812345678'), sys.stdin.read().strip()))")
@@ -11,14 +9,24 @@ cat <<EOF >> /etc/dataloop/agent.finger
 fingerprint = $fingerprint
 EOF
 
-# set the agent hostname to the name passed into docker
-agent_name=$(/opt/dataloop/embedded/bin/python -c "import os; from docker import Client; docker_cli = Client(base_url='unix://rootfs/var/run/docker.sock', version='auto'); print docker_cli.inspect_container(os.environ['HOSTNAME'])['Name'].strip('/')")
-if [ -n "${agent_name}" ]; then
-    echo "name: $agent_name" >> /etc/dataloop/agent.yaml
+if [[ $API_KEY ]]; then
+	sed -i "s/api-key:.*/api-key: $API_KEY/" /etc/dataloop/agent.yaml
+else
+	echo "You must set API_KEY environment variable to run the Dataloop Agent container"
+	exit 1
 fi
 
-# start the agent
+if [[ $SERVER ]]; then
+        sed -i "s|server:.*|server: $SERVER|" /etc/dataloop/agent.yaml
+fi
+
+AGENT_NAME=$(/opt/dataloop/embedded/bin/python -c "import os; from docker import Client; docker_cli = Client(base_url='unix://rootfs/var/run/docker.sock', version='auto'); print docker_cli.inspect_container(os.environ['HOSTNAME'])['Name'].strip('/')")
+
+if [[ $AGENT_NAME ]]; then
+        sed -i "s|#name:.*|name: $AGENT_NAME|" /etc/dataloop/agent.yaml
+fi
+
 exec /opt/dataloop/embedded/bin/python \
-     /opt/dataloop/agent/agent.py -a $API_KEY --server $WSS_URL --name $(cat /rootfs/etc/hostname) \
+     /opt/dataloop/agent/agent.py --config /etc/dataloop/agent.yaml \
      >>/var/log/dataloop/agent.log 2>&1
 
