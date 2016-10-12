@@ -9,20 +9,20 @@ cat <<EOF >> /etc/dataloop/agent.finger
 fingerprint = $fingerprint
 EOF
 
-if [[ $API_KEY ]]; then
+if [ $API_KEY ]; then
 	sed -i "s/api-key:.*/api-key: $API_KEY/" /etc/dataloop/agent.yaml
 else
 	echo "You must set API_KEY environment variable to run the Dataloop Agent container"
 	exit 1
 fi
 
-if [[ $SERVER ]]; then
+if [ $SERVER ]; then
         sed -i "s|server:.*|server: $SERVER|" /etc/dataloop/agent.yaml
 fi
 
 AGENT_NAME=$(/opt/dataloop/embedded/bin/python -c "import os; from docker import Client; docker_cli = Client(base_url='unix://rootfs/var/run/docker.sock', version='auto'); print docker_cli.inspect_container(os.environ['HOSTNAME'])['Name'].strip('/')")
 
-if [[ $AGENT_NAME ]]; then
+if [ $AGENT_NAME ]; then
         sed -i "s|#name:.*|name: $AGENT_NAME|" /etc/dataloop/agent.yaml
 fi
 
