@@ -22,6 +22,12 @@ if os.path.exists('/rootfs/var/run/docker.sock'):
 else:
     docker_cli = Client(**kwargs_from_env(assert_hostname=False))
 
+local_container_name = ''
+with open('/proc/self/cgroup') as fp:
+    for line in fp:
+        if 'cpu:' in line:
+            local_container_name = line.split(':')[2]
+
 
 def get_request_headers(ctx):
     return {
@@ -90,7 +96,8 @@ def get_container(ctx, container):
 
 def get_container_paths(containers):
     def get_path(c):
-        return c['name']
+        if local_container_name not in c['name']:
+            return c['name']
 
     return set(map(get_path, containers))
 
