@@ -23,6 +23,7 @@ ADD cadvisor.run /etc/service/cadvisor/run
 # Dataloop Agent
 RUN mkdir /etc/service/agent
 ADD agent.run /etc/service/agent/run
+ADD base.py /opt/dataloop/plugins
 
 # Scripts!
 COPY discover.py /opt/dataloop/embedded/bin/discover.py
