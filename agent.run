@@ -1,7 +1,9 @@
 #!/bin/sh
 [ -z "$WSS_URL" ] && WSS_URL="wss://agent.dataloop.io"
 echo "Started container agent service" >> /var/log/dataloop/agent.log
-fingerprint=$(cat /proc/self/cgroup | grep docker | grep -o -E '[0-9a-f]{64}' | head -n 1 | cut -c1-12 | /opt/dataloop/embedded/bin/python -c "import sys, uuid; print str(uuid.uuid5(uuid.UUID('12345678123456781234567812345678'), sys.stdin.read()))";)
+containername=$(grep cpu: /proc/self/cgroup | cut -d ':' -f3)
+echo "container name is $containername" >> /var/log/dataloop/agent.log
+fingerprint=$(echo $containername | /opt/dataloop/embedded/bin/python -c "import sys, uuid; print str(uuid.uuid5(uuid.UUID('12345678123456781234567812345678'), sys.stdin.read().strip()))")
 cat <<EOF >> /etc/dataloop/agent.finger
 [private]
 fingerprint = $fingerprint
