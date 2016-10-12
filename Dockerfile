@@ -12,7 +12,7 @@ CMD ["/sbin/my_init"]
 RUN curl -s https://download.dataloop.io/pubkey.gpg | apt-key add - \
     && echo 'deb https://download.dataloop.io/deb/ unstable main' > /etc/apt/sources.list.d/dataloop.list \
     && apt-get update && apt-get install dataloop-agent && dpkg -l | grep dataloop
-RUN /opt/dataloop/embedded/bin/pip install prometheus-client influxdb
+RUN /opt/dataloop/embedded/bin/pip install prometheus-client
 
 # TODO: Install cadvisor - link to for now
 ADD https://github.com/google/cadvisor/releases/download/v0.24.0-alpha1/cadvisor /opt/dataloop/embedded/bin/cadvisor

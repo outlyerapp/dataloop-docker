@@ -1,29 +1,29 @@
 #!/usr/bin/env python
+import time
 import requests
 from prometheus_client.parser import text_string_to_metric_families
-from influxdb import InfluxDBClient, exceptions
-from datetime import datetime
 
-current_time = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+bucket = 'c67767a3-709e-5970-89fe-ad090e333687'
+
 prom_data = requests.get('http://localhost:9100/metrics').content
-influxdb_client = InfluxDBClient('influxdb.dataloop.io', 8086, 'c67767a3-709e-5970-89fe-ad090e333687', '', 'node_exporter')
+influxdb_url = 'http://influxdb.dataloop.io:8086/write?db=node_exporter'
+headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+epoch = str(int(time.time()*1000000000))
+payload = ''
 
 for family in text_string_to_metric_families(prom_data):
     for sample in family.samples:
-        json_body = [
-            {
-                "measurement": sample[0],
-                "tags": sample[1],
-                "time": current_time,
-                "fields": {
-                    "value": sample[2]
-                }
-            }
-        ]
-        try:
-            print influxdb_client.write_points(json_body)
-        except exceptions.InfluxDBClientError, c:
-            if c.code == 200:
-                continue
-        except exceptions.InfluxDBServerError, s:
-            continue
+        metric = str(sample[0]).lower()
+        tags = sample[1]
+        value = str(float(sample[2]))
+        tag_string = ''
+        if tags:
+            for k, v in tags.iteritems():
+                tag_string += "," + k + "=" + v
+        # payload_line = "cpu,host=server01,region=us-west value=0.64 1434055562000000000\n"
+        payload_line = metric + tag_string + ' value=' + value + " " + epoch + '\n'
+        payload += payload_line
+
+print payload
+print requests.post(influxdb_url, data=payload, headers=headers, auth=(bucket, ''))
+
