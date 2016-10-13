@@ -17,7 +17,8 @@ else
 fi
 
 if [ $SERVER ]; then
-        sed -i "s|server:.*|server: $SERVER|" /etc/dataloop/agent.yaml
+    #sed -i "s|server:.*|server: $SERVER|" /etc/dataloop/agent.yaml
+    echo "server: $SERVER" >> /etc/dataloop/agent.yaml
 fi
 
 AGENT_NAME=$(/opt/dataloop/embedded/bin/python -c "import os; from docker import Client; docker_cli = Client(base_url='unix://rootfs/var/run/docker.sock', version='auto'); print docker_cli.inspect_container(os.environ['HOSTNAME'])['Name'].strip('/')")
