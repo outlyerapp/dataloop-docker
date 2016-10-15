@@ -1,7 +1,16 @@
 #!/usr/bin/env python
+import os
+import sys
+import getopt
 import time
 import requests
+import logging
+import dl_lib
 from prometheus_client.parser import text_string_to_metric_families
+
+logger = logging.getLogger(__name__)
+
+os.environ['NO_PROXY'] = '127.0.0.1'
 
 
 def escape_string(s):
@@ -24,7 +33,7 @@ def is_digit(d):
 
 
 def get_prometheus_metrics(prometheus_url):
-    return requests.get(prometheus_url).content
+    return requests.get(prometheus_url, timeout=5).content
 
 
 def convert_prometheus_to_influxdb(prometheus_metrics):
@@ -51,16 +60,68 @@ def convert_prometheus_to_influxdb(prometheus_metrics):
 
 def post_influxdb_metrics(influxdb_url, influxdb_bucket, influxdb_metrics):
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-    return requests.post(influxdb_url, data=influxdb_metrics, headers=headers, auth=(influxdb_bucket, ''))
+    return requests.post(influxdb_url, data=influxdb_metrics, headers=headers, auth=(influxdb_bucket, ''), timeout=5)
+
+
+def scrape(ctx):
+    logger.debug("scraping")
+    try:
+        containers = dl_lib.get_containers(ctx)
+        container_paths = dl_lib.get_container_paths(containers)
+        for container_path in container_paths:
+            container = dl_lib.get_container(ctx, container_path)
+            endpoint = prometheus_endpoint(container)
+            bucket = dl_lib.hash_id(container_path)
+            if endpoint:
+                endpoint_metrics = get_prometheus_metrics(endpoint)
+                influxdb_metrics = convert_prometheus_to_influxdb(endpoint_metrics)
+                response = post_influxdb_metrics(
+                    ctx["influxdb_url"],
+                    bucket,
+                    influxdb_metrics
+                )
+                print response
+    except Exception as ex:
+        logger.error("scraping failed: %s" % ex, exc_info=True)
+    finally:
+        time.sleep(ctx['scrape_interval'])
 
 
 
-# get, convert, post
-node_exporter_metrics = get_prometheus_metrics('http://localhost:9100/metrics')
-influxdb_metrics = convert_prometheus_to_influxdb(node_exporter_metrics)
-influxdb_response = post_influxdb_metrics(
-    'http://influxdb.dataloop.io:8086/write?db=influxdb',
-    'c67767a3-709e-5970-89fe-ad090e333687',
-    influxdb_metrics
-)
-print influxdb_response
+def prometheus_endpoint(container):
+    container_id = dl_lib.get_container_id(container['name'])
+    labels = dl_lib.get_container_labels(container_id)
+    container_network = dl_lib.get_network(container_id)[0]['addresses'][0]['ips'][0]
+    for k, v in labels.iteritems():
+        if k.lower() == 'prometheus.port':
+            return "http://%s:%d/metrics" % (container_network, int(v))
+
+
+def main(argv):
+    ctx = {
+        "scrape_interval": 10,
+        "influxdb_url": "http://influxdb.dataloop.io:8086/write?db=influxdb",
+        "cadvisor_host": "http://127.0.0.1:8080"
+    }
+
+    try:
+        opts, args = getopt.getopt(argv, "hu:c:", ["influxdb_url=", "cadvisor="])
+    except getopt.GetoptError:
+        print 'scrape.py -u <dataloop influxdb url e.g. http://influxdb.dataloop.io:8086/write?db=influxdb>'
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt == '-h':
+            print 'tag.py -a <apikey> -c <cadvisor address:port> -u <dataloop address:port>'
+            sys.exit()
+        elif opt in ("-c", "--cadvisor"):
+            ctx['cadvisor_host'] = arg
+        elif opt in ("-u", "--influxdb_url"):
+            ctx['influxdb_url'] = arg
+
+    while True:
+        scrape(ctx)
+        time.sleep(ctx['scrape_interval'])
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

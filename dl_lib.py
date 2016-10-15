@@ -1,6 +1,7 @@
 import logging
 import os
 import uuid
+import socket
 from docker.client import Client
 from docker.utils import kwargs_from_env
 import sys
@@ -22,11 +23,16 @@ if os.path.exists('/rootfs/var/run/docker.sock'):
 else:
     docker_cli = Client(**kwargs_from_env(assert_hostname=False))
 
-local_container_name = ''
-with open('/proc/self/cgroup') as fp:
-    for line in fp:
-        if 'cpu:' in line:
-            local_container_name = line.split(':')[2]
+
+try:
+    local_container_name = ''
+    with open('/proc/self/cgroup') as fp:
+        for line in fp:
+            if 'cpu:' in line:
+                local_container_name = line.split(':')[2]
+except IOError:
+    logger.error("Scripts should be run from within a container!")
+    local_container_name = socket.gethostname()
 
 
 def get_request_headers(ctx):
