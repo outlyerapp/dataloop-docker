@@ -90,31 +90,36 @@ def scrape(ctx):
         time.sleep(ctx['scrape_interval'])
 
 
-
 def prometheus_endpoint(container):
     container_id = dl_lib.get_container_id(container['name'])
     labels = dl_lib.get_container_labels(container_id)
     container_network = dl_lib.get_network(container_id)[0]['addresses'][0]['ips'][0]
-    for k, v in labels.iteritems():
-        if k.lower() == 'prometheus.port':
-            return "http://%s:%d/metrics" % (container_network, int(v))
+    port, path = None, None
+    if 'prometheus.port' in labels:
+        port = labels['prometheus.port']
+
+    if 'prometheus.path' in labels:
+        path = labels['prometheus.path']
+
+    if port:
+        return "http://%s:%d%s" % (container_network, int(port), path or '/metrics')
 
 
 def main(argv):
     ctx = {
         "scrape_interval": 10,
-        "influxdb_url": "http://influxdb.dataloop.io:8086/write?db=influxdb",
+        "influxdb_url": "http://influxdb.dataloop.io:8086/write?db=metrics",
         "cadvisor_host": "http://127.0.0.1:8080"
     }
 
     try:
         opts, args = getopt.getopt(argv, "hu:c:", ["influxdb_url=", "cadvisor="])
     except getopt.GetoptError:
-        print 'scrape.py -u <dataloop influxdb url e.g. http://influxdb.dataloop.io:8086/write?db=influxdb>'
+        print 'scrape.py -u <dataloop influxdb url e.g. http://influxdb.dataloop.io:8086/write?db=metrics>'
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print 'scrape.py -u <http://influxdb.dataloop.io:8086/write?db=influxdb>'
+            print 'scrape.py -u <http://influxdb.dataloop.io:8086/write?db=metrics>'
             sys.exit()
         elif opt in ("-c", "--cadvisor"):
             ctx['cadvisor_host'] = arg
