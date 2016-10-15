@@ -25,6 +25,8 @@ def escape_string(s):
 
 
 def is_digit(d):
+    if d.lower() == 'nan':
+        return False
     try:
         float(d)
     except ValueError:
@@ -112,7 +114,7 @@ def main(argv):
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print 'tag.py -a <apikey> -c <cadvisor address:port> -u <dataloop address:port>'
+            print 'scrape.py -u <http://influxdb.dataloop.io:8086/write?db=influxdb>'
             sys.exit()
         elif opt in ("-c", "--cadvisor"):
             ctx['cadvisor_host'] = arg
