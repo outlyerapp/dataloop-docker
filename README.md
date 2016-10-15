@@ -7,13 +7,16 @@ To run this container:
 ```
 API_KEY=<<Dataloop API Key>>
 sudo docker run -d -e API_KEY=${API_KEY} \
---name=dataloop-docker \
+--name=$HOSTNAME \
 --volume=/:/rootfs:ro \
 --volume=/var/run:/var/run:rw \
 --volume=/sys:/sys:ro \
 --volume=/var/lib/docker/:/var/lib/docker:ro \
-dataloop/dataloop-docker:latest
+dataloop/dataloop-docker:agent
 ```
+
+To dynamically scrape Prometheus metric endpoints on containers add the label `prometheus.port=<exporter port>`. The dataloop-docker container will then
+scrape those metrics dynamically over the docker 172.17.x.x network.
 
 If using an Amazon Linux AMI you will need to also mount the /cgroup directory into the container.
 
