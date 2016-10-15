@@ -101,12 +101,13 @@ def get_container(ctx, container):
     return requests.get(cadvisor_url).json()
 
 
-def get_container_paths(containers):
-    def get_path(c):
-        if this_container_id not in c['name']:
-            return c['name']
 
-    return set(map(get_path, containers))
+def get_container_paths(containers):
+    container_paths = []
+    for container in containers:
+        if this_container_id not in container['name']:
+            container_paths.append(container['name'])
+    return set(container_paths)
 
 
 def get_container_env_vars(container):
