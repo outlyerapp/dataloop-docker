@@ -103,7 +103,7 @@ def get_container(ctx, container):
 
 def get_container_paths(containers):
     def get_path(c):
-        if local_container_name not in c['name']:
+        if this_container_id not in c['name']:
             return c['name']
 
     return set(map(get_path, containers))
