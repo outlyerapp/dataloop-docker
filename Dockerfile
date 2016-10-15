@@ -31,6 +31,7 @@ COPY presence.py /opt/dataloop/embedded/bin/presence.py
 COPY metrics.py /opt/dataloop/embedded/bin/metrics.py
 COPY dl_lib.py /opt/dataloop/embedded/bin/dl_lib.py
 COPY tag.py /opt/dataloop/embedded/bin/tag.py
+COPY scrape.py /opt/dataloop/embedded/bin/scrape.py
 
 RUN mkdir /etc/service/metrics
 ADD metrics.run /etc/service/metrics/run
@@ -43,6 +44,9 @@ ADD presence.run /etc/service/presence/run
 
 RUN mkdir /etc/service/tag
 ADD tag.run /etc/service/tag/run
+
+RUN mkdir /etc/service/scrape
+ADD scrape.run /etc/service/scrape/run
 
 # Disable some phusion base services
 # RUN touch /etc/service/{cron,sshd,syslog-ng,syslog-forwarder}/down

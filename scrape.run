@@ -1,0 +1,6 @@
+#!/bin/sh
+[ -z "$INFLUXDB_URL" ] && INFLUXDB_URL="http://influxdb.dataloop.io:8086/write?db=influxdb"
+echo "Started container scrape service" >> /var/log/dataloop/scrape.log
+exec /opt/dataloop/embedded/bin/python \
+     /opt/dataloop/embedded/bin/scrape.py -u $INFLUXDB_URL \
+     >>/var/log/dataloop/scrape.log 2>&1
