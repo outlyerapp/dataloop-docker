@@ -82,7 +82,7 @@ def scrape(ctx):
                     bucket,
                     influxdb_metrics
                 )
-                if response.status_code != 200:
+                if response.status_code != 204:
                     logger.error("status code: %s bucket: %s payload: %s" % (response.status_code, bucket, influxdb_metrics))
     except Exception as ex:
         logger.error("scraping failed: %s" % ex, exc_info=True)
