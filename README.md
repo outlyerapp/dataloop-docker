@@ -1,7 +1,7 @@
 Dataloop Docker Autodiscovery Container
 =======================================
 
-Run this container on each of your Docker hosts. It will automatically create an agent instance inside Dataloop for each container on your host with basic operating system metrics under it.
+Run this container on each of your Docker hosts alongside a Dataloo linux agent. It will automatically create an agent instance inside Dataloop for each container on your host with basic operating system metrics under it.
 
 To run this container:
 ```
@@ -15,7 +15,17 @@ sudo docker run -d -e API_KEY=${API_KEY} \
 dataloop/dataloop-docker:latest
 ```
 
-[![](https://badge.imagelayers.io/dataloop/dataloop-docker:latest.svg)](https://imagelayers.io/?images=dataloop/dataloop-docker:latest 'Get your own badge on imagelayers.io')
+If using an Amazon Linux AMI you will need to also mount the /cgroup directory into the container.
+
+```
+-v /cgroup:/sys/fs/cgroup:ro
+```
+
+RHEL and CentOS lock down their containers a bit more. cAdvisor needs access to the Docker daemon through its socket. This requires --privileged=true in RHEL and CentOS.
+
+If you see 0 for base.memory in your containers you will need to enable memory accounting in cgroups. To do that on Ubuntu update the kernel line in Grub:
+
+https://docs.docker.com/engine/installation/linux/ubuntulinux/#adjust-memory-and-swap-accounting
 
 Proxy
 =====

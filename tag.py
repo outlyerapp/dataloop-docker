@@ -48,6 +48,7 @@ def get_tags(ctx, container_path):
     tags += container_image(container)
     tags += contain_env_vars(container)
     tags += container_host_name()
+    tags += container_labels(container)
 
     return tags
 
@@ -74,9 +75,25 @@ def contain_env_vars(container):
     return env_var_tags
 
 
-def container_host_name():
-    return [dl_lib.container_real_host_name()]
+def container_labels(container):
+    def no_dot(label):
+        return '.' not in label
 
+    container_id = dl_lib.get_container_id(container['name'])
+    labels = dl_lib.get_container_labels(container_id)
+    labels_to_tag = filter(no_dot, labels)
+    label_tags = []
+    for var in labels_to_tag:
+        label_tags += [labels[var]]
+    return label_tags
+
+
+def container_host_name():
+    try:
+        return [dl_lib.container_real_host_name()]
+    except Exception as E:
+        logger.error("failed to get container hostname: %s" % E)
+        return []
 
 def main(argv):
     ctx = {
