@@ -117,6 +117,8 @@ def get_container_id(path):
         return path.replace('/system.slice/docker-', '')[:12]
     elif '/system.slice/docker.service/docker/' in path:
         return path.replace('/system.slice/docker.service/docker/', '')[:12]
+    elif '/system.slice/var-lib-docker-containers-' in path:
+        return path.replace('/system.slice/var-lib-docker-containers-', '')[:12]
     else:
         return path.replace('/docker/', '')[:12]
 
