@@ -3,6 +3,7 @@ echo "Started container agent service" >> /var/log/dataloop/agent.log
 
 container_name=$(grep cpu: /proc/self/cgroup | cut -d ':' -f3)
 echo "container name is $container_name" >> /var/log/dataloop/agent.log
+
 fingerprint=$(echo $container_name | /opt/dataloop/embedded/bin/python -c "import sys, uuid; print str(uuid.uuid5(uuid.UUID('12345678123456781234567812345678'), sys.stdin.read().strip()))")
 cat <<EOF >> /etc/dataloop/agent.finger
 [private]
@@ -16,15 +17,13 @@ else
 	exit 1
 fi
 
+SERVER=wss://agent.dataloop.io
 if [ $SERVER ]; then
-    #sed -i "s|server:.*|server: $SERVER|" /etc/dataloop/agent.yaml
-    echo "server: $SERVER" >> /etc/dataloop/agent.yaml
+    sed -i "s|server:.*|server: $SERVER|" /etc/dataloop/agent.yaml
 fi
 
-AGENT_NAME=$(/opt/dataloop/embedded/bin/python -c "import os; from docker import Client; docker_cli = Client(base_url='unix://rootfs/var/run/docker.sock', version='auto'); print docker_cli.inspect_container(os.environ['HOSTNAME'])['Name'].strip('/')")
-
-if [ $AGENT_NAME ]; then
-        sed -i "s|#name:.*|name: $AGENT_NAME|" /etc/dataloop/agent.yaml
+if [ $NAME ]; then
+        sed -i "s|#name:.*|name: $NAME|" /etc/dataloop/agent.yaml
 fi
 
 exec /opt/dataloop/embedded/bin/python \
