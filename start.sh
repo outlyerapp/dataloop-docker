@@ -5,3 +5,4 @@ export AGENT_API_KEY=$API_KEY
 /run/presence.run &
 /run/metrics.run &
 /run/tag.run &
+/run/agent.run

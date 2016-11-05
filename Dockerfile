@@ -23,7 +23,7 @@ RUN pip install --upgrade pip && \
 # Scripts!
 COPY discover.py presence.py metrics.py dl_lib.py tag.py /opt/dataloop/embedded/bin/
 
-COPY cadvisor.run metrics.run discover.run presence.run tag.run start.sh /run/
+COPY agent.run cadvisor.run metrics.run discover.run presence.run tag.run start.sh /run/
 
 ENTRYPOINT ["sh", "-c"]
 CMD ["/run/start.sh"]

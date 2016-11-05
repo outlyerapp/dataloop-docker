@@ -1,13 +1,15 @@
 Dataloop Docker Autodiscovery Container
 =======================================
 
-Run this container on each of your Docker hosts alongside a Dataloo linux agent. It will automatically create an agent instance inside Dataloop for each container on your host with basic operating system metrics under it.
+This container contains a Dataloop agent, CAdvisor and some magic scripts that create virtual agents in Dataloop for each
+running container. Depending on which OS you are running on your Docker hosts you may need to add different run options.
 
-To run this container:
+## Most Linuxes
+
 ```
-API_KEY=<<Dataloop API Key>>
-sudo docker run -d -e API_KEY=${API_KEY} \
---name=dataloop-docker \
+API_KEY=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+docker run -d -e API_KEY=${API_KEY} \
+--name=$HOSTNAME \
 --volume=/:/rootfs:ro \
 --volume=/var/run:/var/run:rw \
 --volume=/sys:/sys:ro \
@@ -15,13 +17,40 @@ sudo docker run -d -e API_KEY=${API_KEY} \
 dataloop/dataloop-docker:latest
 ```
 
+## Amazon Linux
+
 If using an Amazon Linux AMI you will need to also mount the /cgroup directory into the container.
 
 ```
--v /cgroup:/sys/fs/cgroup:ro
+API_KEY=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+docker run -d -e API_KEY=${API_KEY} \
+--name=$HOSTNAME \
+--volume=/:/rootfs:ro \
+--volume=/var/run:/var/run:rw \
+--volume=/sys:/sys:ro \
+--volume=/var/lib/docker/:/var/lib/docker:ro \
+--volume=/cgroup:/sys/fs/cgroup:ro \
+dataloop/dataloop-docker:latest
 ```
 
+## RHEL and CentOS
+
 RHEL and CentOS lock down their containers a bit more. cAdvisor needs access to the Docker daemon through its socket. This requires --privileged=true in RHEL and CentOS.
+
+```
+API_KEY=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+docker run -d -e API_KEY=${API_KEY} \
+--name=$HOSTNAME \
+--privileged=true \
+--volume=/:/rootfs:ro \
+--volume=/var/run:/var/run:rw \
+--volume=/sys:/sys:ro \
+--volume=/var/lib/docker/:/var/lib/docker:ro \
+--volume=/cgroup:/sys/fs/cgroup:ro \
+dataloop/dataloop-docker:latest
+```
+
+# Troubleshooting
 
 If you see 0 for base.memory in your containers you will need to enable memory accounting in cgroups. To do that on Ubuntu update the kernel line in Grub:
 
@@ -57,17 +86,3 @@ Tags agents in Dataloop with their Docker Tags by matching container ID to agent
 - metrics.py
 
 Sends CAdvisor metrics to Dataloop via the Graphite endpoint every 10 seconds by matching container ID to agent name.
-
-- check.py
-
-Polls :8080/health_check for a 200 response code over docker internal network address and emits 0,1,2,3 to <fingerprint>.health_check 
-
-### Interactive running to debug:
-```
-docker run --rm -t -i -e API_KEY=$API_KEY \
---volume=/:/rootfs:ro \
---volume=/var/run:/var/run:rw \
---volume=/sys:/sys:ro \
---volume=/var/lib/docker/:/var/lib/docker:ro \
-dataloop/dataloop-docker:latest /sbin/my_init -- bash -l
-```
