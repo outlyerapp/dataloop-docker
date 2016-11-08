@@ -1,7 +1,7 @@
 #!/usr/bin/with-contenv sh
 
 if [ ! ${DATALOOP_SERVER} ] ; then
-  DATALOOP_SERVER="agent.dataloop.io"
+  DATALOOP_SERVER="http://agent.dataloop.io"
 fi
 
 if [ ! ${GRAPHITE_SERVER} ] ; then

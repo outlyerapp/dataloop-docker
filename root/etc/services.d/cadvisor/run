@@ -2,5 +2,5 @@
 
 echo "Starting cadvisor"
 exec /opt/dataloop/cadvisor \
-     --listen_ip="" --port=8080 >> /var/log/dataloop/cadvisor
+     --listen_ip="" --port=8080 >> /var/log/dataloop/cadvisor 2>&1
 
