@@ -7,6 +7,7 @@ import sys
 import requests
 import re
 import unicodedata
+import socket
 
 os.environ['NO_PROXY'] = '127.0.0.1'
 
@@ -76,7 +77,14 @@ def get_host_data(ctx):
 def get_containers(ctx):
     cadvisor_url = ctx['cadvisor_host'] + "/api/v1.3/docker"
     resp = requests.get(cadvisor_url).json()
-    return resp.values()
+    # return resp.values()
+
+    def filter_host_container(container):
+        if container['id'][:12] != socket.gethostname():
+            return container
+
+    return filter(filter_host_container, resp.values())
+
 
 
 def get_container(ctx, container):
