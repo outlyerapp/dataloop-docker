@@ -4,6 +4,6 @@ if [ ! ${DATALOOP_SERVER} ] ; then
   DATALOOP_SERVER="http://agent.dataloop.io"
 fi
 
-echo "Starting dataloop-discover"
+echo "Starting dataloop-tag"
 exec /usr/bin/python \
-     /opt/dataloop/embedded/bin/discover.py -a $DATALOOP_AGENT_KEY -u $DATALOOP_SERVER >> /var/log/dataloop/tag.log 2>&1
+     /opt/dataloop/embedded/bin/tag.py -a $DATALOOP_AGENT_KEY -u $DATALOOP_SERVER >> /var/log/dataloop/tag.log 2>&1
