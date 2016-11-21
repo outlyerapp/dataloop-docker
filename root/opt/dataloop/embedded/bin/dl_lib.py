@@ -82,6 +82,8 @@ def get_containers(ctx):
     def filter_host_container(container):
         if container['id'][:12] != socket.gethostname():
             return container
+        else:
+            logger.error("This container: %s" % container['id'])
 
     return filter(filter_host_container, resp.values())
 

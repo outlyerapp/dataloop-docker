@@ -15,7 +15,8 @@ def ping(ctx):
     logger.debug("pinging")
     try:
         containers = dl_lib.get_containers(ctx)
-        # for container in containers:
+        for container in containers:
+            logger.error( "found container: %s" % container['id'])
         #     if container['id'][:12] == socket.gethostname():
         #         del containers[containers.index(container)]
         container_paths = dl_lib.get_container_paths(containers)
