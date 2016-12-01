@@ -1,7 +1,7 @@
 #!/usr/bin/with-contenv sh
 
 if [ ! ${DATALOOP_SERVER} ] ; then
-  DATALOOP_SERVER="http://agent.dataloop.io"
+  DATALOOP_SERVER="https://agent.dataloop.io"
 fi
 
 echo "Starting dataloop-tag"
