@@ -4,12 +4,17 @@ Dataloop Docker Autodiscovery Container
 This container contains a Dataloop agent, CAdvisor and some magic scripts that create virtual agents in Dataloop for each
 running container. Depending on which OS you are running on your Docker hosts you may need to add different run options.
 
+This container builds on [dataloop/agent-base](https://github.com/dataloop/docker-alpine/tree/master/agent-base) where further options to pass to the container can be found.
+
 ## Most Linuxes
 
 ```
-API_KEY=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-docker run -d -e API_KEY=${API_KEY} \
---name=$HOSTNAME \
+DATALOOP_AGENT_KEY=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+DATALOOP_NAME=docker_container_name
+docker run -d -e "DATALOOP_AGENT_KEY=${DATALOOP_AGENT_KEY}" \
+-e "DATALOOP_NAME=${DATALOOP_NAME}" \
+-p 8000:8000 \
+-p 8080:8080 \
 --volume=/:/rootfs:ro \
 --volume=/var/run:/var/run:rw \
 --volume=/sys:/sys:ro \
@@ -22,9 +27,12 @@ dataloop/dataloop-docker:latest
 If using an Amazon Linux AMI you will need to also mount the /cgroup directory into the container.
 
 ```
-API_KEY=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-docker run -d -e API_KEY=${API_KEY} \
---name=$HOSTNAME \
+DATALOOP_AGENT_KEY=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+DATALOOP_NAME=docker_container_name
+docker run -d -e "DATALOOP_AGENT_KEY=${DATALOOP_AGENT_KEY}" \
+-e "DATALOOP_NAME=${DATALOOP_NAME}" \
+-p 8000:8000 \
+-p 8080:8080 \
 --volume=/:/rootfs:ro \
 --volume=/var/run:/var/run:rw \
 --volume=/sys:/sys:ro \
@@ -38,9 +46,12 @@ dataloop/dataloop-docker:latest
 RHEL and CentOS lock down their containers a bit more. cAdvisor needs access to the Docker daemon through its socket. This requires --privileged=true in RHEL and CentOS.
 
 ```
-API_KEY=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-docker run -d -e API_KEY=${API_KEY} \
---name=$HOSTNAME \
+DATALOOP_AGENT_KEY=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+DATALOOP_NAME=docker_container_name
+docker run -d -e "DATALOOP_AGENT_KEY=${DATALOOP_AGENT_KEY}" \
+-e "DATALOOP_NAME=${DATALOOP_NAME}" \
+-p 8000:8000 \
+-p 8080:8080 \
 --privileged=true \
 --volume=/:/rootfs:ro \
 --volume=/var/run:/var/run:rw \
@@ -71,7 +82,7 @@ Contributing Changes
 
 If you want to modify the container then feel free to submit a pull request. Below is the spec for what each script does.
 
-A set of independent foreground processes that log to standard out that can be run under a supervisor.
+A set of independent foreground processes that log to standard out that can be run under a [s6-svc](http://skarnet.org/software/s6/)
 
 All state is stored in Dataloop so these scripts can be run in ephemeral containers with no local storage.
 
