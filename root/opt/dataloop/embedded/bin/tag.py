@@ -6,7 +6,7 @@ import time
 import dl_lib
 import os
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('TAG')
 
 os.environ['NO_PROXY'] = '127.0.0.1'
 

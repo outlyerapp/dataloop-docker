@@ -1,48 +1,26 @@
-# Use phusion/baseimage as base image. To make your builds reproducible, make
-# sure you lock down to a specific version, not to `latest`!
-# See https://github.com/phusion/baseimage-docker/blob/master/Changelog.md for
-# a list of version numbers.
-FROM phusion/baseimage:latest
+FROM dataloop/agent-base
 
-# Use baseimage-docker's init system.
-CMD ["/sbin/my_init"]
+ENV GLIBC_VERSION "2.23-r3"
 
-# Install Dataloop Agent
-# For the python environment
-RUN curl -s https://download.dataloop.io/pubkey.gpg | apt-key add - \
-    && echo 'deb https://download.dataloop.io/deb/ unstable main' > /etc/apt/sources.list.d/dataloop.list \
-    && apt-get update && apt-get install dataloop-agent && dpkg -l | grep dataloop
+RUN apk add --no-cache --update ca-certificates wget device-mapper gcc python-dev && \
+    apk add --no-cache --update zfs --repository http://dl-3.alpinelinux.org/alpine/edge/main/ && \
+    wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://raw.githubusercontent.com/sgerrand/alpine-pkg-glibc/master/sgerrand.rsa.pub && \
+    wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/${GLIBC_VERSION}/glibc-${GLIBC_VERSION}.apk && \
+    wget https://github.com/andyshinn/alpine-pkg-glibc/releases/download/${GLIBC_VERSION}/glibc-bin-${GLIBC_VERSION}.apk && \
+    apk add glibc-${GLIBC_VERSION}.apk glibc-bin-${GLIBC_VERSION}.apk && \
+    /usr/glibc-compat/sbin/ldconfig /lib /usr/glibc-compat/lib && \
+    echo 'hosts: files mdns4_minimal [NOTFOUND=return] dns mdns4' >> /etc/nsswitch.conf && \
+    rm -rf /var/cache/apk/*
 
+RUN mkdir -p /opt/dataloop && wget -q -O /opt/dataloop/cadvisor https://github.com/google/cadvisor/releases/download/v0.24.1/cadvisor
 
-# TODO: Install cadvisor - link to for now
-ADD https://github.com/google/cadvisor/releases/download/v0.24.1/cadvisor /opt/dataloop/embedded/bin/cadvisor
-RUN chmod +x /opt/dataloop/embedded/bin/cadvisor
-RUN mkdir /etc/service/cadvisor
-ADD cadvisor.run /etc/service/cadvisor/run
+RUN chmod +x /opt/dataloop/cadvisor 
 
-# Scripts!
-COPY discover.py /opt/dataloop/embedded/bin/discover.py
-COPY presence.py /opt/dataloop/embedded/bin/presence.py
-COPY metrics.py /opt/dataloop/embedded/bin/metrics.py
-COPY dl_lib.py /opt/dataloop/embedded/bin/dl_lib.py
-COPY tag.py /opt/dataloop/embedded/bin/tag.py
+COPY requirements.txt /
+RUN pip install --upgrade pip && \
+    pip install -r requirements.txt
 
-RUN mkdir /etc/service/metrics
-ADD metrics.run /etc/service/metrics/run
+# add run scripts
+ADD root/ /
 
-RUN mkdir /etc/service/discover
-ADD discover.run /etc/service/discover/run
-
-RUN mkdir /etc/service/presence
-ADD presence.run /etc/service/presence/run
-
-RUN mkdir /etc/service/tag
-ADD tag.run /etc/service/tag/run
-
-# Disable some phusion base services
-# RUN touch /etc/service/{cron,sshd,syslog-ng,syslog-forwarder}/down
-RUN touch /etc/service/cron/down \
-    && touch /etc/service/syslog-ng/down
-
-# Clean up APT when done.
-RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+EXPOSE 8080

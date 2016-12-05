@@ -1,5 +1,0 @@
-#!/bin/sh
-echo "Started container cadvisor service" >> /var/log/dataloop/cadvisor.log
-exec /opt/dataloop/embedded/bin/cadvisor \
-     --listen_ip="" --port=8080 \
-     >>/var/log/dataloop/cadvisor.log 2>&1

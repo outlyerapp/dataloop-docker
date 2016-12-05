@@ -1,0 +1,9 @@
+#!/usr/bin/with-contenv sh
+
+if [ ! ${DATALOOP_SERVER} ] ; then
+  DATALOOP_SERVER="https://agent.dataloop.io"
+fi
+
+echo "Starting dataloop-discover"
+exec /usr/bin/python \
+     /opt/dataloop/embedded/bin/discover.py -a $DATALOOP_AGENT_KEY -u $DATALOOP_SERVER >> /var/log/dataloop/discover.log 2>&1

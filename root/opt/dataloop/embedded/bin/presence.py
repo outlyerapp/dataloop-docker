@@ -7,7 +7,7 @@ import grequests
 import dl_lib
 import os
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('PRESENCE')
 
 os.environ['NO_PROXY'] = '127.0.0.1'
 
@@ -15,6 +15,8 @@ def ping(ctx):
     logger.debug("pinging")
     try:
         containers = dl_lib.get_containers(ctx)
+        for container in containers:
+            logger.debug( "found container: %s" % container['id'])
         container_paths = dl_lib.get_container_paths(containers)
         ping_containers(ctx, container_paths)
     except Exception as ex:

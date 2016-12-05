@@ -7,12 +7,13 @@ import sys
 import requests
 import re
 import unicodedata
+import socket
 
 os.environ['NO_PROXY'] = '127.0.0.1'
 
 UUID_HASH = uuid.UUID('12345678123456781234567812345678')
 logger = logging.getLogger(__name__)
-logging.basicConfig(format="%(asctime)s %(levelname)s %(name)s - %(message)s",
+logging.basicConfig(format="%(asctime)s %(name)s %(levelname)s - %(message)s",
                     datefmt="%Y-%m-%d %H:%M:%S",
                     stream=sys.stdout,
                     level=logging.WARNING)
@@ -76,7 +77,16 @@ def get_host_data(ctx):
 def get_containers(ctx):
     cadvisor_url = ctx['cadvisor_host'] + "/api/v1.3/docker"
     resp = requests.get(cadvisor_url).json()
-    return resp.values()
+    # return resp.values()
+
+    def filter_host_container(container):
+        if container['id'][:12] != socket.gethostname():
+            return container
+        else:
+            logger.debug("This container: %s" % container['id'])
+
+    return filter(filter_host_container, resp.values())
+
 
 
 def get_container(ctx, container):
