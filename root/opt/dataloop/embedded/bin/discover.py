@@ -28,6 +28,7 @@ def register_sync(ctx):
         container_hashes = get_container_hashes(containers)
         logger.debug("containers: %s", container_hashes)
         dead_containers = agent_ids - container_hashes
+        logger.debug("dead containers: %s", dead_containers)
         destroy_agents(ctx, dead_containers)
 
 
