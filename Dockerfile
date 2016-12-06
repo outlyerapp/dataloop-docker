@@ -12,9 +12,14 @@ RUN apk add --no-cache --update ca-certificates wget device-mapper gcc python-de
     echo 'hosts: files mdns4_minimal [NOTFOUND=return] dns mdns4' >> /etc/nsswitch.conf && \
     rm -rf /var/cache/apk/*
 
+RUN apk add --no-cache libaio boost && \
+    wget http://nl.alpinelinux.org/alpine/edge/testing/x86_64/thin-provisioning-tools-0.6.2_rc8-r1.apk -O /var/cache/apk/thin-provisioning-tools.apk && \
+    apk add --allow-untrusted /var/cache/apk/thin-provisioning-tools.apk && \
+    ln -s /sbin/thin_ls /bin/thin_ls
+
 RUN mkdir -p /opt/dataloop && wget -q -O /opt/dataloop/cadvisor https://github.com/google/cadvisor/releases/download/v0.24.1/cadvisor
 
-RUN chmod +x /opt/dataloop/cadvisor 
+RUN chmod +x /opt/dataloop/cadvisor
 
 COPY requirements.txt /
 RUN pip install --upgrade pip && \
