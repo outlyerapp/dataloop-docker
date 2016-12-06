@@ -16,7 +16,7 @@ docker run -d -e "DATALOOP_AGENT_KEY=${DATALOOP_AGENT_KEY}" \
 -p 8000:8000 \
 -p 8080:8080 \
 --volume=/:/rootfs:ro \
---volume=/var/run:/var/run:rw \
+--volume=/var/run/docker.sock:/var/run/docker.sock:ro \
 --volume=/sys:/sys:ro \
 --volume=/var/lib/docker/:/var/lib/docker:ro \
 dataloop/dataloop-docker:latest
@@ -34,7 +34,7 @@ docker run -d -e "DATALOOP_AGENT_KEY=${DATALOOP_AGENT_KEY}" \
 -p 8000:8000 \
 -p 8080:8080 \
 --volume=/:/rootfs:ro \
---volume=/var/run:/var/run:rw \
+--volume=/var/run/docker.sock:/var/run/docker.sock:ro \
 --volume=/sys:/sys:ro \
 --volume=/var/lib/docker/:/var/lib/docker:ro \
 --volume=/cgroup:/sys/fs/cgroup:ro \
@@ -54,7 +54,7 @@ docker run -d -e "DATALOOP_AGENT_KEY=${DATALOOP_AGENT_KEY}" \
 -p 8080:8080 \
 --privileged=true \
 --volume=/:/rootfs:ro \
---volume=/var/run:/var/run:rw \
+--volume=/var/run/docker.sock:/var/run/docker.sock:ro \
 --volume=/sys:/sys:ro \
 --volume=/var/lib/docker/:/var/lib/docker:ro \
 --volume=/cgroup:/sys/fs/cgroup:ro \
