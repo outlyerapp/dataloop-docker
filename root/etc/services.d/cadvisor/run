@@ -1,6 +1,0 @@
-#!/usr/bin/with-contenv sh
-
-echo "Starting cadvisor"
-exec /opt/dataloop/cadvisor \
-     --listen_ip="" --port=8080 >> /var/log/dataloop/cadvisor 2>&1
-
